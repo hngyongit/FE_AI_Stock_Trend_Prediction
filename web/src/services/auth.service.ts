@@ -1,6 +1,12 @@
+import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios"
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? ""
+const apiClient = axios.create({
+    baseURL: API_BASE_URL,
+})
 
 const AUTH_STORAGE_KEY = "auth"
+export const AUTH_SESSION_CLEARED_EVENT = "auth-session-cleared"
 
 export type AuthUser = {
     id: string
@@ -42,26 +48,46 @@ type RefreshTokenResponse = {
 
 let refreshInFlight: Promise<string> | null = null
 
+type ApiErrorPayload = {
+    message?: string
+}
+
+function getAxiosErrorMessage(error: unknown, fallback: string) {
+    if (axios.isAxiosError<ApiErrorPayload>(error)) {
+        return error.response?.data?.message || fallback
+    }
+    return fallback
+}
+
+function withAuthHeader(config: AxiosRequestConfig, accessToken: string): AxiosRequestConfig {
+    return {
+        ...config,
+        headers: {
+            ...(config.headers ?? {}),
+            Authorization: `Bearer ${accessToken}`,
+        },
+    }
+}
+
 function getAuthStorage(rememberMe: boolean) {
     return rememberMe ? localStorage : sessionStorage
 }
 
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-    })
+    let payload: LoginResponse
 
-    const payload = (await response.json().catch(() => null)) as LoginResponse | null
-
-    if (!response.ok || payload?.success === false) {
-        throw new Error(payload?.message || "Login failed")
+    try {
+        const response = await apiClient.post<LoginResponse>("/api/auth/login", credentials)
+        payload = response.data
+    } catch (error) {
+        throw new Error(getAxiosErrorMessage(error, "Login failed"))
     }
 
-    if (!payload?.data) {
+    if (payload.success === false) {
+        throw new Error(payload.message || "Login failed")
+    }
+
+    if (!payload.data) {
         throw new Error("Login failed")
     }
 
@@ -69,38 +95,69 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
 }
 
 export async function logout(accessToken: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: "POST",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    })
+    let payload: { success?: boolean; message?: string }
 
-    const payload = (await response.json().catch(() => null)) as { success?: boolean; message?: string } | null
+    try {
+        const response = await apiClient.post<{ success?: boolean; message?: string }>("/api/auth/logout", undefined, {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        })
+        payload = response.data
+    } catch (error) {
+        throw new Error(getAxiosErrorMessage(error, "Logout failed"))
+    }
 
-    if (!response.ok || payload?.success === false) {
-        throw new Error(payload?.message || "Logout failed")
+    if (payload?.success === false) {
+        throw new Error(payload.message || "Logout failed")
     }
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<string> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh-token`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refresh_token: refreshToken }),
-    })
+    let payload: RefreshTokenResponse
 
-    const payload = (await response.json().catch(() => null)) as RefreshTokenResponse | null
+    try {
+        const response = await apiClient.post<RefreshTokenResponse>("/api/auth/refresh-token", {
+            refresh_token: refreshToken,
+        })
+        payload = response.data
+    } catch (error) {
+        throw new Error(getAxiosErrorMessage(error, "Unable to refresh access token"))
+    }
 
-    const nextAccessToken = payload?.data?.access_token
-    if (!response.ok || payload?.success === false || !nextAccessToken) {
-        throw new Error(payload?.message || "Unable to refresh access token")
+    const nextAccessToken = payload.data?.access_token
+    if (payload.success === false || !nextAccessToken) {
+        throw new Error(payload.message || "Unable to refresh access token")
     }
 
     return nextAccessToken
 }
+
+export async function authenticatedRequest<T = unknown>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+    const session = readAuthSession()
+    const requestConfig: AxiosRequestConfig = {
+        ...config,
+        validateStatus: () => true,
+    }
+
+    const firstConfig = session?.accessToken ? withAuthHeader(requestConfig, session.accessToken) : requestConfig
+    const firstResponse = await apiClient.request<T>(firstConfig)
+    if (firstResponse.status !== 401) return firstResponse
+
+    if (!session?.refreshToken) return firstResponse
+
+    try {
+        const nextAccessToken = await refreshWithLock(session.refreshToken)
+        saveUpdatedAccessToken(nextAccessToken)
+
+        return await apiClient.request<T>(withAuthHeader(requestConfig, nextAccessToken))
+    } catch {
+        clearAuthSession({ notify: true })
+        return firstResponse
+    }
+}
+
+export const authApiClient = apiClient
 
 export function saveAuthSession(authData: StoredAuthSession, rememberMe: boolean) {
     const storage = getAuthStorage(rememberMe)
@@ -127,7 +184,7 @@ export function readAuthSession(): StoredAuthSession | null {
     }
 }
 
-export function clearAuthSession() {
+export function clearAuthSession(options?: { notify?: boolean }) {
     localStorage.removeItem(AUTH_STORAGE_KEY)
     localStorage.removeItem("access_token")
     localStorage.removeItem("refresh_token")
@@ -137,6 +194,10 @@ export function clearAuthSession() {
     sessionStorage.removeItem("refresh_token")
     sessionStorage.removeItem("user")
     localStorage.removeItem("rememberMe")
+
+    if (options?.notify) {
+        window.dispatchEvent(new Event(AUTH_SESSION_CLEARED_EVENT))
+    }
 }
 
 function isRememberMeEnabled() {
@@ -163,30 +224,4 @@ async function refreshWithLock(refreshToken: string) {
         })
     }
     return refreshInFlight
-}
-
-export async function authenticatedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-    const session = readAuthSession()
-    const firstHeaders = new Headers(init?.headers ?? {})
-
-    if (session?.accessToken) {
-        firstHeaders.set("Authorization", `Bearer ${session.accessToken}`)
-    }
-
-    const firstResponse = await fetch(input, { ...init, headers: firstHeaders })
-    if (firstResponse.status !== 401) return firstResponse
-
-    if (!session?.refreshToken) return firstResponse
-
-    try {
-        const nextAccessToken = await refreshWithLock(session.refreshToken)
-        saveUpdatedAccessToken(nextAccessToken)
-
-        const retryHeaders = new Headers(init?.headers ?? {})
-        retryHeaders.set("Authorization", `Bearer ${nextAccessToken}`)
-        return await fetch(input, { ...init, headers: retryHeaders })
-    } catch {
-        clearAuthSession()
-        return firstResponse
-    }
 }

@@ -1,5 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? ""
-import { authenticatedFetch } from "@/services/auth.service"
+import { authenticatedRequest } from "@/services/auth.service"
 
 export type UserProfile = {
     id?: string
@@ -17,13 +16,14 @@ type MeResponse = {
 }
 
 export async function getMyProfile(): Promise<UserProfile> {
-    const response = await authenticatedFetch(`${API_BASE_URL}/api/auth/me`, {
+    const response = await authenticatedRequest<MeResponse>({
+        url: "/api/auth/me",
         method: "GET",
     })
 
-    const payload = (await response.json().catch(() => null)) as MeResponse | null
+    const payload = response.data
 
-    if (!response.ok || payload?.success === false) {
+    if (response.status < 200 || response.status >= 300 || payload?.success === false) {
         throw new Error(payload?.message || "Unable to load profile")
     }
 
