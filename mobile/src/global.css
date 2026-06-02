@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display:
+    Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    Segoe UI Symbol, Noto Color Emoji;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  --font-rounded: Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-serif: Georgia, 'Times New Roman', serif;
+
+  --stock-surface: #101415;
+  --stock-surface-lowest: #0b0f10;
+  --stock-surface-low: #191c1e;
+  --stock-surface-container: #1d2022;
+  --stock-surface-high: #272a2c;
+  --stock-surface-highest: #323537;
+  --stock-border: #334155;
+  --stock-border-muted: #424754;
+  --stock-text: #e0e3e5;
+  --stock-text-muted: #c2c6d6;
+  --stock-primary: #3b82f6;
+  --stock-primary-soft: #adc6ff;
+  --stock-up: #22c55e;
+  --stock-down: #ef4444;
+  --stock-warning: #ffb786;
+  --stock-chart-grid: rgba(51, 65, 85, 0.1);
+}
+
+html {
+  background-color: var(--stock-surface);
+  color: var(--stock-text);
+  font-family: var(--font-display);
+}

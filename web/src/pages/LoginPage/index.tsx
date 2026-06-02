@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { login, saveAuthSession } from "@/services/auth.service.ts"
+import { login } from "@/services/auth.service.ts"
 import { useAuth } from "@/providers/AuthProvider"
 import { Input } from "@/components/ui/input"
 import "./login.css"
@@ -81,13 +81,7 @@ export default function LoginPage() {
                 return
             }
 
-            if (rememberMe) {
-                localStorage.setItem("rememberMe", "true")
-            } else {
-                localStorage.removeItem("rememberMe")
-            }
-
-            saveAuthSession(
+            auth.setSession(
                 {
                     accessToken: authData.access_token,
                     refreshToken: authData.refresh_token,
@@ -95,13 +89,6 @@ export default function LoginPage() {
                 },
                 rememberMe
             )
-
-            // update provider state so protected routes react immediately
-            try {
-                auth.setSession({ accessToken: authData.access_token, refreshToken: authData.refresh_token, user: authData.user })
-            } catch (e) {
-                // ignore if provider not available
-            }
 
             const role = String(authData.user.role || "").toUpperCase()
             const destination = role === "ADMIN" ? "/admin/dashboard" : role === "STAFF" ? "/staff/dashboard" : "/dashboard"
