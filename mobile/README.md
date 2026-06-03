@@ -9,10 +9,4 @@ npm install
 npm run android
 ```
 
-## Structure
 
-- `src/app`: Expo Router entry points.
-- `src/features`: product screens and feature modules.
-- `src/shared`: reusable design tokens and shared components.
-- `src/stores`: Zustand stores.
-- `components/ui`: generated Gluestack primitives.
