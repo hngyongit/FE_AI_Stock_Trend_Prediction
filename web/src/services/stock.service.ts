@@ -1,6 +1,6 @@
 import { authenticatedRequest } from "@/services/auth.service"
 
-export type StockChartRange = "1d" | "1w" | "1m" | "3m" | "1y" | "ytd"
+export type StockChartRange = "7d" | "1m" | "3m" | "1y" | "all"
 
 export type StockCandle = {
     time: string

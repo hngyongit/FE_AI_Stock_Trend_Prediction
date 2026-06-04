@@ -269,19 +269,6 @@
     text-align: right;
 }
 
-.stock-detail__quality {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    padding: 9px 12px;
-    color: var(--muted-foreground);
-    font-size: 0.72rem;
-}
-
-.stock-detail__quality span:last-child {
-    margin-left: auto;
-}
-
 .stock-detail__empty,
 .stock-detail__error {
     display: flex;
@@ -346,6 +333,7 @@
 }
 
 @media (max-width: 1180px) {
+
     .stock-detail__controls,
     .stock-detail__main-grid,
     .stock-detail__lower-grid {

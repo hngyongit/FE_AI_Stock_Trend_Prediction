@@ -17,7 +17,7 @@ import "./StockDetailPage.css"
 
 type Indicator = "SMA" | "EMA" | "RSI" | "MACD" | "Bollinger Bands"
 
-const RANGES: StockChartRange[] = ["1d", "1w", "1m", "3m", "1y", "ytd"]
+const RANGES: StockChartRange[] = ["7d", "1m", "3m", "1y", "all"]
 const INDICATORS: Indicator[] = ["SMA", "EMA", "RSI", "MACD", "Bollinger Bands"]
 
 type LoadState = {
@@ -529,14 +529,6 @@ export default function StockDetailPage() {
                         </div>
                     ) : <EmptyState message="No volume buckets available." />}
                 </div>
-            </section>
-
-            <section className="stock-detail__quality">
-                <span>Source: {meta.source || "--"}</span>
-                <span>Verification: {meta.verified === undefined ? "--" : meta.verified ? "Verified" : "--"}</span>
-                <span>Completeness: {meta.completeness === undefined ? "--" : typeof meta.completeness === "number" ? `${formatNumber(meta.completeness, 0)}%` : meta.completeness}</span>
-                <span>Last crawl: {meta.lastCrawl || "--"}</span>
-                <span>API status: {meta.apiStatus || (state.error ? "Error" : state.isLoading ? "Loading" : "OK")}</span>
             </section>
         </div>
     )
