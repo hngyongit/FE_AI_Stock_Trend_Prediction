@@ -1,0 +1,131 @@
+/* ── Skeleton ──────────────────────────────────────── */
+
+.shared-skeleton {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    border-radius: 8px;
+    background: #1e293b;
+}
+
+.shared-skeleton::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.14), transparent);
+    animation: shared-shimmer 1.25s infinite;
+}
+
+@keyframes shared-shimmer {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* ── Status badge ──────────────────────────────────── */
+
+.shared-status-badge {
+    min-width: 72px;
+    justify-content: center;
+}
+
+.shared-status-badge--positive {
+    border-color: rgba(34, 197, 94, 0.45);
+    background: rgba(34, 197, 94, 0.14);
+    color: #86efac;
+}
+
+.shared-status-badge--warning {
+    border-color: rgba(245, 158, 11, 0.45);
+    background: rgba(245, 158, 11, 0.14);
+    color: #fcd34d;
+}
+
+.shared-status-badge--negative {
+    border-color: rgba(239, 68, 68, 0.45);
+    background: rgba(239, 68, 68, 0.14);
+    color: #fca5a5;
+}
+
+.shared-status-badge--neutral {
+    border-color: rgba(148, 163, 184, 0.35);
+    background: rgba(148, 163, 184, 0.1);
+    color: #cbd5e1;
+}
+
+/* ── Search ────────────────────────────────────────── */
+
+.shared-search {
+    position: relative;
+}
+
+.shared-search__icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    color: var(--muted-foreground);
+}
+
+.shared-search__input {
+    padding-left: 34px;
+}
+
+/* ── Pagination ────────────────────────────────────── */
+
+.shared-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: var(--muted-foreground);
+    font-size: 0.76rem;
+}
+
+.shared-pagination__buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ── Table states (loading / error / empty) ────────── */
+
+.shared-table-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 240px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+}
+
+.shared-table-state--error {
+    color: #fca5a5;
+}
+
+.shared-table-state__head {
+    height: 42px;
+}
+
+.shared-table-state__body {
+    height: 280px;
+}
+
+/* ── Number coloring ───────────────────────────────── */
+
+.shared-positive {
+    color: #22c55e !important;
+}
+
+.shared-negative {
+    color: #ef4444 !important;
+}
+
+.shared-neutral {
+    color: var(--foreground) !important;
+}

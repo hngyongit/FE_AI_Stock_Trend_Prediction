@@ -2,20 +2,29 @@ import { useEffect, useMemo, useState } from "react"
 import {
     ArrowDownUp,
     Bell,
-    ChevronLeft,
-    ChevronRight,
     Download,
     RefreshCw,
-    Search,
     Star,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
 import { getStockList, type StockItem, type StockListMeta, type StockListQuery } from "@/services/stock.service"
+import {
+    SearchInput,
+    StatusBadge,
+    DataTablePagination,
+    TableLoading,
+    TableError,
+    TableEmpty,
+    TableNoMatch,
+    placeholder,
+    formatNumber,
+    formatCompact,
+    formatPercent,
+} from "@/shared/components"
+import "@/shared/components/shared-stock.css"
 import "./StockListPage.css"
 
 type SortKey = "symbol" | "companyName" | "latestClosePrice" | "changePercent" | "volume" | "marketCap"
@@ -35,40 +44,6 @@ const DEFAULT_QUERY: StockListQuery = {
 }
 
 const LOCAL_PAGE_SIZE_OPTIONS = [20, 25, 50]
-
-function formatNumber(value?: number, digits = 2) {
-    if (value === undefined || !Number.isFinite(value)) return "--"
-    return new Intl.NumberFormat("en-US", {
-        minimumFractionDigits: digits,
-        maximumFractionDigits: digits,
-    }).format(value)
-}
-
-function formatCompact(value?: number) {
-    if (value === undefined || !Number.isFinite(value)) return "--"
-    return new Intl.NumberFormat("en-US", {
-        notation: "compact",
-        maximumFractionDigits: 1,
-    }).format(value)
-}
-
-function formatPercent(value?: number) {
-    if (value === undefined || !Number.isFinite(value)) return "--"
-    return `${value > 0 ? "+" : ""}${formatNumber(value, 2)}%`
-}
-
-function placeholder(value?: string) {
-    return value?.trim() ? value : "--"
-}
-
-function getStatusTone(status?: string) {
-    const normalized = status?.trim().toLowerCase()
-    if (!normalized) return "neutral"
-    if (["active", "listed", "trading", "open", "normal"].includes(normalized)) return "positive"
-    if (["pending", "watch", "review", "hold", "warning", "paused"].includes(normalized)) return "warning"
-    if (["inactive", "suspended", "halted", "delisted", "closed", "error"].includes(normalized)) return "negative"
-    return "neutral"
-}
 
 function downloadCsv(rows: StockItem[]) {
     const header = [
@@ -105,10 +80,6 @@ function downloadCsv(rows: StockItem[]) {
     link.download = "stock-list.csv"
     link.click()
     URL.revokeObjectURL(url)
-}
-
-function SkeletonBlock({ className }: { className?: string }) {
-    return <div className={cn("stock-list__skeleton", className)} />
 }
 
 export default function StockListPage() {
@@ -291,15 +262,7 @@ export default function StockListPage() {
             </section>
 
             <section className="stock-list__controls">
-                <label className="stock-list__search">
-                    <Search className="stock-list__search-icon size-4" />
-                    <Input
-                        value={searchText}
-                        onChange={(event) => setSearchText(event.target.value)}
-                        placeholder="Search by symbol or company"
-                        className="stock-list__search-input"
-                    />
-                </label>
+                <SearchInput value={searchText} onChange={setSearchText} />
 
                 <select
                     value={query.market}
@@ -381,30 +344,13 @@ export default function StockListPage() {
                 </div>
 
                 {state.isLoading ? (
-                    <div className="stock-list__loading">
-                        <SkeletonBlock className="stock-list__table-skeleton" />
-                        <SkeletonBlock className="stock-list__rows-skeleton" />
-                    </div>
+                    <TableLoading />
                 ) : state.error ? (
-                    <div className="stock-list__error">
-                        <strong>Request failed</strong>
-                        <span>{endpoint}</span>
-                        <span>{state.error}</span>
-                        <Button type="button" size="xs" onClick={() => setQuery((current) => ({ ...current }))}>
-                            <RefreshCw className="size-3" /> Retry
-                        </Button>
-                    </div>
+                    <TableError message={state.error} endpoint={endpoint} onRetry={() => setQuery((current) => ({ ...current }))} />
                 ) : !state.items.length ? (
-                    <div className="stock-list__empty">
-                        <span>No stocks are available for the selected market.</span>
-                    </div>
+                    <TableEmpty message="No stocks are available for the selected market." />
                 ) : !sortedItems.length ? (
-                    <div className="stock-list__empty">
-                        <span>No stocks match the current filters.</span>
-                        <Button type="button" size="xs" variant="outline" onClick={clearFilters}>
-                            Clear filters
-                        </Button>
-                    </div>
+                    <TableNoMatch onClear={clearFilters} />
                 ) : (
                     <>
                         <div className="stock-list__table-wrap">
@@ -443,7 +389,6 @@ export default function StockListPage() {
                                 <tbody>
                                     {paginatedItems.map((item) => {
                                         const industryLabel = item.industry || item.sector
-                                        const statusTone = getStatusTone(item.status)
                                         return (
                                             <tr key={item.symbol}>
                                                 <td className="stock-list__symbol-cell">{item.symbol}</td>
@@ -451,21 +396,13 @@ export default function StockListPage() {
                                                 <td><Badge variant="outline">{placeholder(item.market)}</Badge></td>
                                                 <td>{placeholder(industryLabel)}</td>
                                                 <td>
-                                                    <Badge
-                                                        variant="outline"
-                                                        className={cn(
-                                                            "stock-list__status-badge",
-                                                            `stock-list__status-badge--${statusTone}`
-                                                        )}
-                                                    >
-                                                        {placeholder(item.status)}
-                                                    </Badge>
+                                                    <StatusBadge status={item.status} />
                                                 </td>
                                                 <td>{formatNumber(item.latestClosePrice)}</td>
-                                                <td className={item.change === undefined ? "is-neutral" : item.change > 0 ? "is-positive" : item.change < 0 ? "is-negative" : "is-neutral"}>
+                                                <td className={item.change === undefined ? "shared-neutral" : item.change > 0 ? "shared-positive" : item.change < 0 ? "shared-negative" : "shared-neutral"}>
                                                     {item.change === undefined ? "--" : formatNumber(item.change)}
                                                 </td>
-                                                <td className={item.changePercent === undefined ? "is-neutral" : item.changePercent > 0 ? "is-positive" : item.changePercent < 0 ? "is-negative" : "is-neutral"}>
+                                                <td className={item.changePercent === undefined ? "shared-neutral" : item.changePercent > 0 ? "shared-positive" : item.changePercent < 0 ? "shared-negative" : "shared-neutral"}>
                                                     {formatPercent(item.changePercent)}
                                                 </td>
                                                 <td>{formatCompact(item.volume)}</td>
@@ -508,20 +445,14 @@ export default function StockListPage() {
                             </table>
                         </div>
 
-                        <div className="stock-list__footer">
-                            <span>
-                                Showing {(tablePage - 1) * rowsPerPage + 1}-{Math.min(tablePage * rowsPerPage, sortedItems.length)} of {sortedItems.length}
-                            </span>
-                            <div className="stock-list__pager-buttons">
-                                <Button type="button" variant="outline" size="icon-xs" onClick={() => setTablePage((current) => Math.max(1, current - 1))} disabled={tablePage === 1}>
-                                    <ChevronLeft className="size-3" />
-                                </Button>
-                                <span>{tablePage} / {totalPages}</span>
-                                <Button type="button" variant="outline" size="icon-xs" onClick={() => setTablePage((current) => Math.min(totalPages, current + 1))} disabled={tablePage === totalPages}>
-                                    <ChevronRight className="size-3" />
-                                </Button>
-                            </div>
-                        </div>
+                        <DataTablePagination
+                            page={tablePage}
+                            totalPages={totalPages}
+                            from={(tablePage - 1) * rowsPerPage + 1}
+                            to={Math.min(tablePage * rowsPerPage, sortedItems.length)}
+                            total={sortedItems.length}
+                            onPageChange={setTablePage}
+                        />
                     </>
                 )}
             </section>
