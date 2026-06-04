@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNod
 import {
     History,
     LayoutDashboard,
-    LineChart,
     Menu,
     Scale,
     Settings,
     ShieldAlert,
+    TableProperties,
     Users,
 } from "lucide-react"
 import { NavLink, Outlet, useNavigate } from "react-router-dom"
@@ -51,7 +51,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
     { label: "Dashboard", path: "", icon: LayoutDashboard },
-    { label: "Stock Analysis", path: "stock-analysis", icon: LineChart },
+    { label: "Stock List", path: "stock-list", icon: TableProperties },
     { label: "Watchlist", path: "watchlist", icon: Users },
     { label: "Alerts", path: "alerts", icon: ShieldAlert },
     { label: "Historical Analysis", path: "historical-analysis", icon: History },
@@ -175,6 +175,11 @@ export default function UserLayout({ shellData, basePath = "/staff", children }:
                             values={marketPills}
                             marketStatus={statusText}
                             isStatusMuted={statusText === "--"}
+                            onValueClick={(value, index) => {
+                                if (index === 0 && value !== "--") {
+                                    navigate(`/stocks/${encodeURIComponent(value)}`)
+                                }
+                            }}
                         />
                     </div>
                 </div>
