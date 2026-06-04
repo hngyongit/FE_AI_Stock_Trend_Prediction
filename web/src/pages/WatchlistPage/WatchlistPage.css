@@ -1,0 +1,88 @@
+.watchlist {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    color: var(--foreground);
+}
+
+.watchlist__breadcrumb {
+    font-size: 0.72rem;
+    color: var(--muted-foreground);
+}
+
+.watchlist__header,
+.watchlist__table-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #111827; /* surface-card */
+}
+
+.watchlist__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+}
+
+.watchlist__header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.watchlist__header p {
+    margin: 6px 0 0;
+    color: var(--muted-foreground);
+    font-size: 0.8rem;
+}
+
+.watchlist__table-card {
+    min-width: 0;
+    padding: 12px;
+}
+
+.watchlist__table-wrap {
+    overflow: auto;
+    border: 1px solid color-mix(in oklab, var(--border) 75%, transparent);
+    border-radius: 8px;
+}
+
+.watchlist__table {
+    width: 100%;
+    min-width: 600px;
+    border-collapse: collapse;
+}
+
+.watchlist__table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #0f172a; /* background-primary */
+}
+
+.watchlist__table th,
+.watchlist__table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+    text-align: left;
+    font-size: 0.74rem;
+    white-space: nowrap;
+}
+
+.watchlist__table th {
+    color: var(--muted-foreground);
+    font-weight: 600;
+}
+
+.watchlist__table td {
+    color: #dbeafe;
+}
+
+.watchlist__table tbody tr:hover {
+    background: rgba(30, 41, 59, 0.45); /* elevated hover */
+}
+
+.watchlist__symbol-cell {
+    font-weight: 700;
+    color: var(--foreground) !important;
+}
