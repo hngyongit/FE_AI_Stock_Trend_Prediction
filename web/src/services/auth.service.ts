@@ -73,6 +73,41 @@ function getAuthStorage(rememberMe: boolean) {
     return rememberMe ? localStorage : sessionStorage
 }
 
+export type RegisterResponse = {
+    success: boolean
+    message: string
+    data: {
+        user: AuthUser
+    }
+}
+
+type RegisterCredentials = {
+    full_name: string
+    email: string
+    password: string
+}
+
+export async function register(credentials: RegisterCredentials): Promise<RegisterResponse> {
+    let payload: RegisterResponse
+
+    try {
+        const response = await apiClient.post<RegisterResponse>("/api/auth/register", credentials)
+        payload = response.data
+    } catch (error) {
+        throw new Error(getAxiosErrorMessage(error, "Registration failed"))
+    }
+
+    if (payload.success === false) {
+        throw new Error(payload.message || "Registration failed")
+    }
+
+    if (!payload.data) {
+        throw new Error("Registration failed")
+    }
+
+    return payload
+}
+
 export async function login(credentials: LoginCredentials): Promise<LoginResponse> {
     let payload: LoginResponse
 
