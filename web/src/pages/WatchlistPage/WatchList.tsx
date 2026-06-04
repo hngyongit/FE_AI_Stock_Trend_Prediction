@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react"
-import { Trash2, RefreshCw } from "lucide-react"
+import { Trash2, RefreshCw, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import type { StockItem } from "@/services/stock.service"
-import { getWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import { getWatchlist, removeFromWatchlist, addToWatchlist } from "@/services/watchlist.service"
 import {
     TableLoading,
     TableError,
@@ -18,6 +26,9 @@ export default function WatchlistPage() {
     const [watchlist, setWatchlist] = useState<StockItem[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [symbolInput, setSymbolInput] = useState<string>("")
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
 
     const loadWatchlist = async () => {
         setIsLoading(true)
@@ -41,8 +52,24 @@ export default function WatchlistPage() {
             await removeFromWatchlist(symbol)
             setWatchlist((prev) => prev.filter((item) => item.symbol !== symbol))
         } catch (err: any) {
-            // Có thể mở rộng dùng Toast của shadcn ở đây, tạm thời alert
             alert(err.message || `Failed to remove ${symbol}`)
+        }
+    }
+
+    const handleAddStock = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!symbolInput.trim()) return
+        
+        setIsSubmitting(true)
+        try {
+            await addToWatchlist(symbolInput.trim().toUpperCase())
+            setSymbolInput("")
+            setIsOpen(false)
+            await loadWatchlist()
+        } catch (err: any) {
+            alert(err.message || "Failed to add stock")
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -55,16 +82,58 @@ export default function WatchlistPage() {
                     <h1>My Watchlist</h1>
                     <p>Monitor your selected stocks in real-time</p>
                 </div>
-                <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={loadWatchlist}
-                    disabled={isLoading}
-                >
-                    <RefreshCw className="mr-1.5 size-3.5" />
-                    Refresh
-                </Button>
+                <div className="flex gap-2">
+                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                        <DialogTrigger asChild>
+                            <Button type="button" variant="default" size="sm">
+                                <Plus className="mr-1.5 size-3.5" />
+                                Add Stock
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] bg-[#111827] text-white border-slate-700">
+                            <DialogHeader>
+                                <DialogTitle>Add Stock to Watchlist</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleAddStock} className="space-y-4 pt-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-medium">Stock Symbol</label>
+                                    <Input
+                                        type="text"
+                                        placeholder="EX: FPT, AAA, VNM"
+                                        value={symbolInput}
+                                        onChange={(e) => setSymbolInput(e.target.value)}
+                                        className="bg-[#0f172a] border-slate-700 text-white placeholder-slate-500 uppercase"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsOpen(false)}
+                                        disabled={isSubmitting}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={isSubmitting}>
+                                        {isSubmitting ? "Adding..." : "Add"}
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={loadWatchlist}
+                        disabled={isLoading}
+                    >
+                        <RefreshCw className="mr-1.5 size-3.5" />
+                        Refresh
+                    </Button>
+                </div>
             </section>
 
             <section className="watchlist__table-card">
