@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { getStockList, type StockItem, type StockListMeta, type StockListQuery } from "@/services/stock.service"
-import "./stock-list.css"
+import "./StockListPage.css"
 
 type SortKey = "symbol" | "companyName" | "latestClosePrice" | "changePercent" | "volume" | "marketCap"
 type SortDirection = "asc" | "desc"

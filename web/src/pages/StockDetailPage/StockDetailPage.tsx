@@ -13,7 +13,7 @@ import {
     type StockChartMeta,
     type StockChartRange,
 } from "@/services/stock.service"
-import "./stock-detail.css"
+import "./StockDetailPage.css"
 
 type Indicator = "SMA" | "EMA" | "RSI" | "MACD" | "Bollinger Bands"
 
