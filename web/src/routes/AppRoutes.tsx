@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import LandingPage from "@/pages/LandingPage/LandingPage"
 import LoginPage from "@/pages/LoginPage/Login"
 import Admin from "@/pages/Admin"
+import AdminStockList from "@/pages/Admin/StockManagement/AdminStockList"
 import UserProfilePage from "@/pages/UserProfilePage/UserProfilePage"
 import AdminLayout from "@/layouts/AdminLayout"
 import Register from "@/pages/Register/Register"
@@ -15,7 +16,6 @@ const ADMIN_ROUTES = [
     "/admin/dashboard",
     "/admin/users",
     "/admin/staff",
-    "/admin/stocks",
     "/admin/market-coverage",
     "/admin/alerts",
     "/admin/roles",
@@ -45,6 +45,16 @@ export default function AppRoutes(): React.ReactElement {
                     <RequireAuth requiredRole="ADMIN">
                         <AdminLayout>
                             <UserProfilePage />
+                        </AdminLayout>
+                    </RequireAuth>
+                }
+            />
+            <Route
+                path="/admin/stocks"
+                element={
+                    <RequireAuth requiredRole="ADMIN">
+                        <AdminLayout>
+                            <AdminStockList />
                         </AdminLayout>
                     </RequireAuth>
                 }
