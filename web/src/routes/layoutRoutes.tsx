@@ -5,7 +5,8 @@ import AlertsPage from "@/pages/AlertsPage"
 import ComparisonPage from "@/pages/ComparisonPage"
 import HistoricalAnalysisPage from "@/pages/HistoricalAnalysisPage"
 import SettingsPage from "@/pages/SettingsPage"
-import StockAnalysisPage from "@/pages/StockAnalysisPage"
+import StockDetailPage from "@/pages/StockDetailPage"
+import StockListPage from "@/pages/StockListPage"
 import UserDashboard from "@/pages/UserDashboard"
 import WatchlistPage from "@/pages/WatchlistPage"
 import UserProfilePage from "@/pages/UserProfilePage"
@@ -26,7 +27,10 @@ export type LayoutRoute = {
 export const USER_ROUTES: LayoutRoute[] = [
     { path: "/dashboard", element: <UserDashboard /> },
     { path: "/profile", element: <UserProfilePage /> },
-    { path: "/stock-analysis", element: <StockAnalysisPage /> },
+    { path: "/stocks", element: <StockDetailPage /> },
+    { path: "/stocks/:symbol", element: <StockDetailPage /> },
+    { path: "/stock-list", element: <StockListPage /> },
+    { path: "/stock-analysis", element: <Navigate to="/stock-list" replace /> },
     { path: "/watchlist", element: <WatchlistPage /> },
     { path: "/alerts", element: <AlertsPage /> },
     { path: "/historical-analysis", element: <HistoricalAnalysisPage /> },

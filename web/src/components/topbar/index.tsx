@@ -11,6 +11,7 @@ type ScopeBadgesProps = {
     values: string[]
     marketStatus: string
     isStatusMuted?: boolean
+    onValueClick?: (value: string, index: number) => void
 }
 
 type TopbarSearchProps = {
@@ -101,14 +102,25 @@ export function TopbarBrand({ text, onClick, classNamePrefix = "terminal-shell",
     )
 }
 
-export function TopbarScopeBadges({ values, marketStatus, isStatusMuted = false }: ScopeBadgesProps) {
+export function TopbarScopeBadges({ values, marketStatus, isStatusMuted = false, onValueClick }: ScopeBadgesProps) {
     return (
         <div className="terminal-shell__pills" aria-label="Market scope">
-            {values.map((value) => (
-                <Badge key={value} variant="outline" className="terminal-shell__scope-badge">
-                    {value}
-                </Badge>
-            ))}
+            {values.map((value, index) =>
+                onValueClick ? (
+                    <button
+                        key={value}
+                        type="button"
+                        className="terminal-shell__scope-badge terminal-shell__scope-badge-button"
+                        onClick={() => onValueClick(value, index)}
+                    >
+                        {value}
+                    </button>
+                ) : (
+                    <Badge key={value} variant="outline" className="terminal-shell__scope-badge">
+                        {value}
+                    </Badge>
+                )
+            )}
             <Badge
                 variant="outline"
                 className={cn("terminal-shell__scope-badge terminal-shell__scope-badge--status", isStatusMuted && "is-muted")}

@@ -62,12 +62,29 @@
 }
 
 .terminal-shell__scope-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     height: 24px;
+    border: 1px solid var(--terminal-shell-border);
+    border-radius: 9999px;
     border-color: var(--terminal-shell-border);
     background: color-mix(in oklab, var(--terminal-shell-background) 84%, var(--terminal-shell-surface) 16%);
     padding: 0 10px;
     font-size: 0.72rem;
     color: var(--terminal-shell-muted);
+}
+
+.terminal-shell__scope-badge-button {
+    cursor: pointer;
+}
+
+.terminal-shell__scope-badge-button:hover,
+.terminal-shell__scope-badge-button:focus-visible {
+    border-color: var(--terminal-shell-primary);
+    color: var(--terminal-shell-foreground);
+    outline: none;
 }
 
 .terminal-shell__scope-badge--status {
