@@ -1,0 +1,242 @@
+.register-root {
+    background: #0b0e15;
+    color: var(--foreground);
+    min-height: 100vh;
+}
+
+.register-frame {
+    min-height: 100vh;
+    border: 1px solid rgba(51, 65, 85, 0.7);
+    box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.06),
+        0 30px 80px rgba(2, 6, 23, 0.7);
+}
+
+.register-center {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+}
+
+.register-card {
+    width: 100%;
+    max-width: 28rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #10131a;
+    padding: 24px;
+    box-shadow: 0 20px 60px rgba(2, 6, 23, 0.6);
+}
+
+.register-breadcrumb {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: #64748b;
+    letter-spacing: 0.02em;
+    margin-bottom: 6px;
+}
+
+.register-breadcrumb-accent {
+    color: #8fb1ff;
+}
+
+.register-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f8fafc;
+    line-height: 1.3;
+}
+
+.register-subtitle {
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+    line-height: 1.5;
+}
+
+.register-form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.register-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.register-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+}
+
+.register-input-wrapper {
+    position: relative;
+}
+
+.register-input {
+    width: 100%;
+    height: 36px;
+    border-radius: 5px;
+    border: 1px solid #243142;
+    background: #0c1119;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    color: var(--foreground);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.register-input::placeholder {
+    color: #475569;
+}
+
+.register-input:focus-visible {
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.35);
+}
+
+.register-input-error {
+    border-color: rgba(239, 68, 68, 0.7);
+}
+
+.register-input-error:focus-visible {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
+
+.register-input-action {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.register-input.with-action {
+    padding-right: 40px;
+}
+
+.register-row-duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.register-error {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: #f87171;
+}
+
+.register-checkbox-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+    line-height: 1.4;
+}
+
+.register-checkbox-row input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    min-width: 14px;
+    border-radius: 3px;
+    border: 1px solid #334155;
+    background: #0c1119;
+    accent-color: #60a5fa;
+    margin-top: 2px;
+}
+
+.register-checkbox-row input[type="checkbox"]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.35);
+}
+
+.register-link {
+    color: #8fb1ff;
+    text-underline-offset: 4px;
+    transition: color 0.15s ease;
+}
+
+.register-link:hover {
+    color: #b7ccff;
+    text-decoration: underline;
+}
+
+.register-button {
+    height: 36px;
+    width: 100%;
+    border-radius: 5px;
+    background: #3b7bff;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(10, 28, 76, 0.4);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+}
+
+.register-button:hover:not(:disabled) {
+    background: #2f6bea;
+}
+
+.register-button:active:not(:disabled) {
+    background: #2a5fd1;
+}
+
+.register-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.register-footer-text {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+}
+
+.register-divider {
+    margin-top: 24px;
+    border-top: 1px solid rgba(51, 65, 85, 0.8);
+    padding-top: 16px;
+}
+
+.register-security-message {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #64748b;
+}
+
+.register-server-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    font-size: 0.7rem;
+    color: #f87171;
+    line-height: 1.4;
+}
+
+@media (max-width: 480px) {
+    .register-row-duo {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .register-card {
+        padding: 20px 16px;
+    }
+}
