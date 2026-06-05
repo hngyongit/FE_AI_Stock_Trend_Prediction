@@ -158,6 +158,34 @@
     font-size: 0.72rem;
 }
 
+.stock-detail__quote-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.stock-detail__quote-item {
+    font-weight: 600;
+}
+
+.stock-detail__quote-item--open {
+    color: #93c5fd;
+}
+
+.stock-detail__quote-item--high {
+    color: #34d399;
+}
+
+.stock-detail__quote-item--low {
+    color: #fb7185;
+}
+
+.stock-detail__quote-item--close {
+    color: #e0f2fe;
+}
+
 .stock-detail__chart {
     flex: 1;
     width: 100%;

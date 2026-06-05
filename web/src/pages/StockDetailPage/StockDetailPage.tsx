@@ -410,6 +410,9 @@ export default function StockDetailPage() {
     const isPositive = (analytics.change ?? 0) >= 0
     const maxBucketVolume = Math.max(...analytics.distribution.map((bucket) => bucket.volume), 1)
     const meta = state.meta
+    const latestChange = analytics.change === undefined
+        ? "--"
+        : `${isPositive ? "+" : ""}${formatNumber(analytics.change, 3)} (${formatPercent(analytics.changePercent)})`
 
     return (
         <div className="stock-detail">
@@ -490,7 +493,19 @@ export default function StockDetailPage() {
                     <div className="stock-detail__card-header">
                         <div>
                             <h2>Candlestick & Volume</h2>
-                            <p>O/H/L/C {analytics.latest ? `${formatNumber(analytics.latest.open)} / ${formatNumber(analytics.latest.high)} / ${formatNumber(analytics.latest.low)} / ${formatNumber(analytics.latest.close)}` : "--"} · Volume {formatCompact(analytics.latest?.volume)}</p>
+                            <p className="stock-detail__quote-line">
+                                {analytics.latest ? (
+                                    <>
+                                        <span className="stock-detail__quote-item stock-detail__quote-item--open">O {formatNumber(analytics.latest.open, 3)}</span>
+                                        <span className="stock-detail__quote-item stock-detail__quote-item--high">H {formatNumber(analytics.latest.high, 3)}</span>
+                                        <span className="stock-detail__quote-item stock-detail__quote-item--low">L {formatNumber(analytics.latest.low, 3)}</span>
+                                        <span className="stock-detail__quote-item stock-detail__quote-item--close">C {formatNumber(analytics.latest.close, 3)}</span>
+                                    </>
+                                ) : (
+                                    <span>--</span>
+                                )}
+                                <span className={isPositive ? "is-positive" : "is-negative"}>{latestChange}</span>
+                            </p>
                         </div>
                         <Badge variant={analytics.trend === "Bullish" ? "default" : analytics.trend === "Bearish" ? "destructive" : "outline"}>
                             {analytics.trend}
