@@ -22,6 +22,7 @@ import {
 import {
     SearchInput,
     StatusBadge,
+    Breadcrumb,
     DataTablePagination,
     TableLoading,
     TableError,
@@ -489,7 +490,7 @@ export default function AdminStockList() {
 
     return (
         <div className="ams">
-            <div className="ams__breadcrumb">Admin / Stock Management</div>
+            <Breadcrumb items={["Admin", "Stock Management"]} />
 
             {/* Header */}
             <section className="ams__header">

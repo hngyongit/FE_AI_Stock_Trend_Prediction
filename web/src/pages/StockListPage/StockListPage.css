@@ -13,8 +13,7 @@
 .stock-list__header,
 .stock-list__controls,
 .stock-list__table-card,
-.stock-list__summary-card,
-.stock-list__notice {
+.stock-list__summary-card {
     border: 1px solid var(--border);
     border-radius: 10px;
     background: #111827;
@@ -89,12 +88,6 @@
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 8px;
-}
-
-.stock-list__notice {
-    padding: 10px 12px;
-    color: #bfdbfe;
-    font-size: 0.78rem;
 }
 
 .stock-list__summary-grid {

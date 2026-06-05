@@ -1,18 +1,23 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import ReactECharts from "echarts-for-react"
 import type { EChartsOption } from "echarts"
+import type EChartsReact from "echarts-for-react"
 import { Bell, Download, Eye, GitCompareArrows, RefreshCw, Star } from "lucide-react"
 import { useParams } from "react-router-dom"
+import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Breadcrumb } from "@/shared/components"
 import {
     getStockChart,
     type StockCandle,
     type StockChartMeta,
     type StockChartRange,
 } from "@/services/stock.service"
+import { getWatchlist, addToWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import { useAuthStore } from "@/stores/auth.store"
 import "./StockDetailPage.css"
 
 type Indicator = "SMA" | "EMA" | "RSI" | "MACD" | "Bollinger Bands"
@@ -151,9 +156,60 @@ function EmptyState({ message }: { message: string }) {
 export default function StockDetailPage() {
     const { symbol: routeSymbol } = useParams()
     const symbol = (routeSymbol || "FPT").toUpperCase()
+    const chartRef = useRef<EChartsReact>(null)
     const [range, setRange] = useState<StockChartRange>("1m")
     const [activeIndicators, setActiveIndicators] = useState<Set<Indicator>>(new Set(["SMA", "EMA"]))
     const [isWatched, setIsWatched] = useState(false)
+    const [watchlistLoading, setWatchlistLoading] = useState(false)
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
+    useEffect(() => {
+        if (!isAuthenticated || !symbol) return
+        let cancelled = false
+        void (async () => {
+            try {
+                const list = await getWatchlist()
+                if (!cancelled) {
+                    setIsWatched(list.some((item) => item.symbol === symbol))
+                }
+            } catch {
+                // non-blocking
+            }
+        })()
+        return () => { cancelled = true }
+    }, [isAuthenticated, symbol])
+
+    const handleWatchToggle = async () => {
+        if (!isAuthenticated) {
+            toast.error("Authentication required", {
+                description: "Please log in to manage your watchlist",
+            })
+            return
+        }
+        setWatchlistLoading(true)
+        try {
+            if (isWatched) {
+                await removeFromWatchlist(symbol)
+                setIsWatched(false)
+                toast.success("Removed from watchlist", {
+                    description: `${symbol} has been removed from your watchlist`,
+                })
+            } else {
+                await addToWatchlist(symbol)
+                setIsWatched(true)
+                toast.success("Added to watchlist", {
+                    description: `${symbol} has been added to your watchlist`,
+                })
+            }
+        } catch (error) {
+            toast.error("Watchlist update failed", {
+                description: error instanceof Error ? error.message : "An unexpected error occurred",
+            })
+        } finally {
+            setWatchlistLoading(false)
+        }
+    }
+
     const [state, setState] = useState<LoadState>({
         candles: [],
         meta: {},
@@ -178,6 +234,21 @@ export default function StockDetailPage() {
     useEffect(() => {
         void loadChart()
     }, [loadChart])
+
+    // Resize chart when its container changes size
+    useEffect(() => {
+        const instance = chartRef.current?.getEchartsInstance()
+        if (!instance) return
+
+        const container = document.querySelector(".stock-detail__chart")
+        if (!container) return
+
+        const observer = new ResizeObserver(() => {
+            instance.resize()
+        })
+        observer.observe(container)
+        return () => observer.disconnect()
+    }, [state.candles.length])
 
     const analytics = useMemo(() => {
         const candles = state.candles
@@ -271,10 +342,19 @@ export default function StockDetailPage() {
             animation: false,
             tooltip: {
                 trigger: "axis",
-                axisPointer: { type: "cross", crossStyle: { color: "#64748b" } },
+                confine: true,
+                axisPointer: {
+                    type: "line",
+                    lineStyle: { color: "#64748b", width: 1 },
+                    label: { show: false },
+                },
                 backgroundColor: "#111827",
                 borderColor: "#334155",
+                borderWidth: 1,
+                padding: [6, 10],
                 textStyle: { color: "#e2e8f0", fontSize: 12 },
+                extraCssText:
+                    "box-shadow:0 4px 12px rgba(0,0,0,0.5);border-radius:6px;",
             },
             legend: {
                 top: 4,
@@ -283,8 +363,8 @@ export default function StockDetailPage() {
                 textStyle: { color: "#94a3b8", fontSize: 11 },
             },
             grid: [
-                { left: 46, right: 16, top: 34, height: "62%" },
-                { left: 46, right: 16, top: "78%", height: "14%" },
+                { left: 46, right: 16, top: 34, height: "68%" },
+                { left: 46, right: 16, top: "84%", height: "14%" },
             ],
             xAxis: [
                 {
@@ -333,7 +413,7 @@ export default function StockDetailPage() {
 
     return (
         <div className="stock-detail">
-            <div className="stock-detail__breadcrumb">Home / Dashboard / Stock Detail</div>
+            <Breadcrumb items={["Home", "Dashboard", "Stock Detail"]} />
 
             <section className="stock-detail__header">
                 <div>
@@ -399,8 +479,8 @@ export default function StockDetailPage() {
                     </Button>
                     <Button type="button" variant="outline" size="sm"><GitCompareArrows className="size-3.5" /> Compare</Button>
                     <Button type="button" variant="outline" size="sm"><Bell className="size-3.5" /> Alert</Button>
-                    <Button type="button" variant={isWatched ? "default" : "outline"} size="sm" onClick={() => setIsWatched((value) => !value)}>
-                        <Star className="size-3.5" /> Watch
+                    <Button type="button" variant={isWatched ? "default" : "outline"} size="sm" onClick={handleWatchToggle} disabled={watchlistLoading}>
+                        <Star className={`size-3.5 ${isWatched ? "fill-amber-400 text-amber-400" : ""} ${watchlistLoading ? "animate-pulse" : ""}`} /> {watchlistLoading ? "Processing..." : isWatched ? "Watching" : "Watch"}
                     </Button>
                 </div>
             </section>
@@ -426,7 +506,7 @@ export default function StockDetailPage() {
                             </Button>
                         </div>
                     ) : state.candles.length ? (
-                        <ReactECharts option={chartOption} className="stock-detail__chart" notMerge lazyUpdate />
+                        <ReactECharts ref={chartRef} option={chartOption} className="stock-detail__chart" notMerge lazyUpdate onChartReady={(instance) => instance.resize()} />
                     ) : (
                         <EmptyState message="No chart data is available for the selected range." />
                     )}

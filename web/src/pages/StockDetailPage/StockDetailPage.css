@@ -133,6 +133,8 @@
 }
 
 .stock-detail__chart-card {
+    display: flex;
+    flex-direction: column;
     min-height: 520px;
 }
 
@@ -157,8 +159,14 @@
 }
 
 .stock-detail__chart {
-    height: 470px;
+    flex: 1;
     width: 100%;
+    min-height: 0;
+}
+
+.stock-detail__chart > div:first-child {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .stock-detail__metrics {
@@ -303,7 +311,8 @@
 }
 
 .stock-detail__chart-skeleton {
-    height: 470px;
+    flex: 1;
+    min-height: 0;
 }
 
 .stock-detail__panel-skeleton {

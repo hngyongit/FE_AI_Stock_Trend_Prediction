@@ -1,20 +1,15 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Trash2, RefreshCw, Plus } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
 import type { StockItem } from "@/services/stock.service"
-import { getWatchlist, removeFromWatchlist, addToWatchlist } from "@/services/watchlist.service"
+import { getWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import AddStockModal from "@/shared/components/AddStockModal"
 import {
     TableLoading,
     TableError,
     TableEmpty,
+    Breadcrumb,
     placeholder,
     formatNumber,
     formatPercent,
@@ -23,12 +18,14 @@ import "@/shared/components/shared-stock.css"
 import "./WatchlistPage.css"
 
 export default function WatchlistPage() {
+    const navigate = useNavigate()
     const [watchlist, setWatchlist] = useState<StockItem[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [isOpen, setIsOpen] = useState<boolean>(false)
-    const [symbolInput, setSymbolInput] = useState<string>("")
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+
+    // Derived set of currently watched symbols
+    const watchedSymbols = useMemo(() => new Set(watchlist.map((s) => s.symbol)), [watchlist])
 
     const loadWatchlist = async () => {
         setIsLoading(true)
@@ -56,77 +53,32 @@ export default function WatchlistPage() {
         }
     }
 
-    const handleAddStock = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!symbolInput.trim()) return
-        
-        setIsSubmitting(true)
-        try {
-            await addToWatchlist(symbolInput.trim().toUpperCase())
-            setSymbolInput("")
-            setIsOpen(false)
-            await loadWatchlist()
-        } catch (err: any) {
-            alert(err.message || "Failed to add stock")
-        } finally {
-            setIsSubmitting(false)
-        }
-    }
-
     return (
         <div className="watchlist">
-            <div className="watchlist__breadcrumb">Home / Watchlist</div>
-            
+            <Breadcrumb items={["Home", "Watchlist"]} />
+
             <section className="watchlist__header">
                 <div>
                     <h1>My Watchlist</h1>
                     <p>Monitor your selected stocks in real-time</p>
                 </div>
                 <div className="flex gap-2">
-                    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                        <DialogTrigger asChild>
-                            <Button type="button" variant="default" size="sm">
-                                <Plus className="mr-1.5 size-3.5" />
-                                Add Stock
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] bg-[#111827] text-white border-slate-700">
-                            <DialogHeader>
-                                <DialogTitle>Add Stock to Watchlist</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={handleAddStock} className="space-y-4 pt-4">
-                                <div className="space-y-2">
-                                    <label className="text-xs text-slate-400 font-medium">Stock Symbol</label>
-                                    <Input
-                                        type="text"
-                                        placeholder="EX: FPT, AAA, VNM"
-                                        value={symbolInput}
-                                        onChange={(e) => setSymbolInput(e.target.value)}
-                                        className="bg-[#0f172a] border-slate-700 text-white placeholder-slate-500 uppercase"
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                                <div className="flex justify-end gap-2 pt-2">
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => setIsOpen(false)}
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" disabled={isSubmitting}>
-                                        {isSubmitting ? "Adding..." : "Add"}
-                                    </Button>
-                                </div>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                    <Button type="button" variant="default" size="sm" onClick={() => setIsOpen(true)}>
+                        <Plus className="mr-1.5 size-3.5" />
+                        Add Stock
+                    </Button>
 
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
+                    <AddStockModal
+                        open={isOpen}
+                        onOpenChange={setIsOpen}
+                        watchedSymbols={watchedSymbols}
+                        onWatchlistChange={loadWatchlist}
+                    />
+
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={loadWatchlist}
                         disabled={isLoading}
                     >
@@ -160,7 +112,7 @@ export default function WatchlistPage() {
                                 {watchlist.map((stock) => {
                                     const isPositive = (stock.changePercent ?? 0) >= 0;
                                     const isNegative = (stock.changePercent ?? 0) < 0;
-                                    
+
                                     return (
                                         <tr key={stock.symbol}>
                                             <td className="watchlist__symbol-cell">{stock.symbol}</td>
@@ -168,27 +120,37 @@ export default function WatchlistPage() {
                                             <td>{placeholder(stock.market)}</td>
                                             <td>{formatNumber(stock.latestClosePrice)}</td>
                                             <td className={
-                                                stock.changePercent === undefined 
-                                                    ? "shared-neutral" 
-                                                    : isPositive 
-                                                        ? "shared-positive" 
-                                                        : isNegative 
-                                                            ? "shared-negative" 
+                                                stock.changePercent === undefined
+                                                    ? "shared-neutral"
+                                                    : isPositive
+                                                        ? "shared-positive"
+                                                        : isNegative
+                                                            ? "shared-negative"
                                                             : "shared-neutral"
                                             }>
                                                 {formatPercent(stock.changePercent)}
                                             </td>
                                             <td className="text-right">
-                                                <Button
-                                                    type="button"
-                                                    variant="ghost"
-                                                    size="icon-xs"
-                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                    onClick={() => handleRemove(stock.symbol)}
-                                                    aria-label={`Remove ${stock.symbol}`}
-                                                >
-                                                    <Trash2 className="size-3.5" />
-                                                </Button>
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="xs"
+                                                        onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
+                                                    >
+                                                        View Detail
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon-xs"
+                                                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                        onClick={() => handleRemove(stock.symbol)}
+                                                        aria-label={`Remove ${stock.symbol}`}
+                                                    >
+                                                        <Trash2 className="size-3.5" />
+                                                    </Button>
+                                                </div>
                                             </td>
                                         </tr>
                                     )

@@ -133,3 +133,68 @@
 }
 
 @layer components {}
+
+/* ── Sonner Toaster Global Overrides ── */
+[data-sonner-toaster] {
+  /* Stack notifications as a list, newest at the bottom */
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+/* Close button: positioned fully inside the top-right corner of the toast */
+[data-sonner-toast][data-styled="true"] [data-close-button] {
+  position: absolute !important;
+  top: 5px !important;
+  right: 5px !important;
+  left: unset !important;
+  bottom: unset !important;
+  transform: none !important;
+  height: 20px !important;
+  width: 20px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 0.6;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: #cbd5e1;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 200ms ease;
+}
+
+[data-sonner-toast][data-styled="true"] [data-close-button]:hover {
+  opacity: 1;
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-sonner-toast][data-styled="true"] [data-close-button] svg {
+  height: 14px !important;
+  width: 14px !important;
+}
+
+/* Fade in/out animation instead of default slide */
+[data-sonner-toast] {
+  position: relative !important;
+  transition: opacity 300ms ease, transform 300ms ease !important;
+  transform: translateY(0) !important;
+}
+
+[data-sonner-toast][data-mounted="true"] {
+  opacity: 1;
+}
+
+[data-sonner-toast][data-removed="true"][data-front="true"] {
+  opacity: 0;
+  transform: translateY(0) !important;
+}
+
+/* Remove swipe-out animations */
+[data-sonner-toast][data-swipe-out="true"] {
+  animation: none !important;
+  opacity: 0 !important;
+}
