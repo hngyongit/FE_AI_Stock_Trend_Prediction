@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     ArrowDownUp,
     Bell,
@@ -7,13 +7,17 @@ import {
     Star,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { getStockList, type StockItem, type StockListMeta, type StockListQuery } from "@/services/stock.service"
+import { getWatchlist, addToWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import { useAuthStore } from "@/stores/auth.store"
 import {
     SearchInput,
     StatusBadge,
+    Breadcrumb,
     DataTablePagination,
     TableLoading,
     TableError,
@@ -98,13 +102,64 @@ export default function StockListPage() {
     const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
     const [tablePage, setTablePage] = useState(1)
     const [rowsPerPage, setRowsPerPage] = useState(25)
-    const [actionMessage, setActionMessage] = useState<string | null>(null)
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+    const [watchedSymbols, setWatchedSymbols] = useState<Set<string>>(new Set())
+    const [watchlistLoading, setWatchlistLoading] = useState<Set<string>>(new Set())
+
+    const loadWatchedSymbols = useCallback(async () => {
+        if (!isAuthenticated) return
+        try {
+            const list = await getWatchlist()
+            setWatchedSymbols(new Set(list.map((item) => item.symbol)))
+        } catch {
+            // silently fail — non-blocking background fetch
+        }
+    }, [isAuthenticated])
 
     useEffect(() => {
-        if (!actionMessage) return undefined
-        const timeout = window.setTimeout(() => setActionMessage(null), 2400)
-        return () => window.clearTimeout(timeout)
-    }, [actionMessage])
+        void loadWatchedSymbols()
+    }, [loadWatchedSymbols])
+
+    const handleWatchlistToggle = async (symbol: string) => {
+        if (!isAuthenticated) {
+            toast.error("Authentication required", {
+                description: "Please log in to manage your watchlist",
+            })
+            return
+        }
+        if (watchlistLoading.has(symbol)) return
+
+        setWatchlistLoading((prev) => new Set(prev).add(symbol))
+        try {
+            if (watchedSymbols.has(symbol)) {
+                await removeFromWatchlist(symbol)
+                setWatchedSymbols((prev) => {
+                    const next = new Set(prev)
+                    next.delete(symbol)
+                    return next
+                })
+                toast.success("Removed from watchlist", {
+                    description: `${symbol} has been removed from your watchlist`,
+                })
+            } else {
+                await addToWatchlist(symbol)
+                setWatchedSymbols((prev) => new Set(prev).add(symbol))
+                toast.success("Added to watchlist", {
+                    description: `${symbol} has been added to your watchlist`,
+                })
+            }
+        } catch (error) {
+            toast.error("Watchlist update failed", {
+                description: error instanceof Error ? error.message : "An unexpected error occurred",
+            })
+        } finally {
+            setWatchlistLoading((prev) => {
+                const next = new Set(prev)
+                next.delete(symbol)
+                return next
+            })
+        }
+    }
 
     useEffect(() => {
         let isMounted = true
@@ -246,7 +301,7 @@ export default function StockListPage() {
 
     return (
         <div className="stock-list">
-            <div className="stock-list__breadcrumb">Home / Stock List</div>
+            <Breadcrumb items={["Home", "Stock List"]} />
 
             <section className="stock-list__header">
                 <div>
@@ -305,8 +360,6 @@ export default function StockListPage() {
                     </Button>
                 </div>
             </section>
-
-            {actionMessage ? <div className="stock-list__notice">{actionMessage}</div> : null}
 
             <section className="stock-list__summary-grid">
                 {[
@@ -420,12 +473,17 @@ export default function StockListPage() {
                                                         </Button>
                                                         <Button
                                                             type="button"
-                                                            variant="outline"
+                                                            variant={watchedSymbols.has(item.symbol) ? "default" : "outline"}
                                                             size="icon-xs"
-                                                            aria-label={`Add ${item.symbol} to watchlist`}
-                                                            onClick={() => setActionMessage(`Watchlist integration is not connected yet for ${item.symbol}.`)}
+                                                            aria-label={watchedSymbols.has(item.symbol) ? `Remove ${item.symbol} from watchlist` : `Add ${item.symbol} to watchlist`}
+                                                            onClick={() => handleWatchlistToggle(item.symbol)}
+                                                            disabled={watchlistLoading.has(item.symbol)}
+                                                            className={watchedSymbols.has(item.symbol) ? "text-white" : "text-white/60"}
                                                         >
-                                                            <Star className="size-3" />
+                                                            <Star
+                                                                className={watchlistLoading.has(item.symbol) ? "size-3 animate-pulse" : "size-3"}
+                                                                fill={watchedSymbols.has(item.symbol) ? "currentColor" : "none"}
+                                                            />
                                                         </Button>
                                                         <Button
                                                             type="button"

@@ -54,6 +54,24 @@
     color: #cbd5e1;
 }
 
+/* ── Breadcrumb ────────────────────────────────────── */
+
+.shared-breadcrumb {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    padding: 8px 16px;
+    background: transparent;
+}
+
+.shared-breadcrumb__separator {
+    color: #475569;
+    margin: 0 4px;
+}
+
+.shared-breadcrumb__item {
+    color: #94a3b8;
+}
+
 /* ── Search ────────────────────────────────────────── */
 
 .shared-search {
