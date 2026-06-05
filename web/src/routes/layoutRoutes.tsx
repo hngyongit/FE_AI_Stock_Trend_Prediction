@@ -1,6 +1,9 @@
 import type { ReactElement } from "react"
 import { Navigate } from "react-router-dom"
 
+import AdminShell from "@/pages/Admin"
+import AdminUserManagement from "@/pages/Admin/AdminUserManagement/AdminUserManagement"
+import AdminStockList from "@/pages/Admin/StockManagement/AdminStockList"
 import AlertsPage from "@/pages/AlertsPage"
 import ComparisonPage from "@/pages/ComparisonPage"
 import HistoricalAnalysisPage from "@/pages/HistoricalAnalysisPage"
@@ -50,4 +53,17 @@ export const STAFF_ROUTES: LayoutRoute[] = [
     { path: "/staff/import-history", element: <ImportHistoryPage /> },
     { path: "/staff/stock-data-monitor", element: <StockDataMonitorPage /> },
     { path: "/staff/settings", element: <SettingsPage /> },
+]
+
+export const ADMIN_ROUTES: LayoutRoute[] = [
+    { path: "/admin/dashboard", element: <AdminShell /> },
+    { path: "/admin/users", element: <AdminUserManagement /> },
+    { path: "/admin/staff", element: <AdminShell /> },
+    { path: "/admin/market-coverage", element: <AdminShell /> },
+    { path: "/admin/alerts", element: <AdminShell /> },
+    { path: "/admin/roles", element: <AdminShell /> },
+    { path: "/admin/logs", element: <AdminShell /> },
+    { path: "/admin/settings", element: <AdminShell /> },
+    { path: "/admin/profile", element: <UserProfilePage /> },
+    { path: "/admin/stocks", element: <AdminStockList /> },
 ]

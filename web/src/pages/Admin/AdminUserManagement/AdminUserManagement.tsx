@@ -1,7 +1,13 @@
 ﻿import { useEffect, useState } from "react"
-import { RefreshCw, Lock, Unlock } from "lucide-react"
+import { RefreshCw, Lock, Unlock, Eye } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   DataTablePagination,
   SearchInput,
@@ -26,6 +32,7 @@ import {
 import "./AdminUserManagement.css"
 
 const ROLE_OPTIONS: UserRole[] = ["ADMIN", "STAFF", "USER"]
+const ROLE_OPTIONS_CHANGE: UserRole[] = ["STAFF", "USER"]
 const STATUS_OPTIONS: UserStatus[] = ["ACTIVE", "LOCKED", "INACTIVE", "DEACTIVATED"]
 
 export default function AdminUserManagement() {
@@ -40,6 +47,7 @@ export default function AdminUserManagement() {
   const [statusFilter, setStatusFilter] = useState<UserStatus | "">("")
 
   const [updatingIds, setUpdatingIds] = useState<string[]>([])
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
 
     const loadData = async () => {
         setIsLoading(true)
@@ -153,13 +161,7 @@ export default function AdminUserManagement() {
           <p>View and manage platform users</p>
         </div>
               <div className="ams__header-status">
-                  <div className="ams__stat-card">
-                      <div className="ams__stat-icon">👥</div>
-                      <div>
-                          <span className="ams__stat-label">Total users</span>
-                          <strong className="ams__stat-value">{total || "--"}</strong>
-                      </div>
-                  </div>
+                  <span><strong>Total users</strong>{total || "--"}</span>
               </div>
       </section>
 
@@ -222,10 +224,11 @@ export default function AdminUserManagement() {
                       <td>
                         <select
                           value={user.role}
+                          className="ams__table-select"
                           onChange={(e) => changeRole(user, e.target.value as UserRole)}
                           disabled={updatingIds.includes(user.id)}
                         >
-                          {ROLE_OPTIONS.map((r) => (
+                          {ROLE_OPTIONS_CHANGE.map((r) => (
                             <option key={r} value={r}>{r}</option>
                           ))}
                         </select>
@@ -242,6 +245,16 @@ export default function AdminUserManagement() {
                       </td>
                       <td>
                         <div className="ams__row-actions">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="xs"
+                            onClick={() => setSelectedUser(user)}
+                            disabled={updatingIds.includes(user.id)}
+                          >
+                            <Eye className="size-3" />
+                            View
+                          </Button>
                           <Button
                             type="button"
                             variant="outline"
@@ -271,6 +284,51 @@ export default function AdminUserManagement() {
           </>
         )}
       </section>
+
+      {/* User Detail Dialog */}
+      <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <DialogContent className="ams-modal">
+          <DialogHeader>
+            <DialogTitle>User Details</DialogTitle>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="ams-modal__body">
+              <div className="ams-modal__field">
+                <label className="ams-modal__label">Full Name</label>
+                <div className="ams-modal__input">{selectedUser.full_name || "-"}</div>
+              </div>
+              <div className="ams-modal__field">
+                <label className="ams-modal__label">Email</label>
+                <div className="ams-modal__input">{selectedUser.email || "-"}</div>
+              </div>
+              <div className="ams-modal__row">
+                <div className="ams-modal__field">
+                  <label className="ams-modal__label">Role</label>
+                  <div className="ams-modal__input">{selectedUser.role}</div>
+                </div>
+                <div className="ams-modal__field">
+                  <label className="ams-modal__label">Status</label>
+                  <div className="ams-modal__input">{selectedUser.status}</div>
+                </div>
+              </div>
+              <div className="ams-modal__row">
+                <div className="ams-modal__field">
+                  <label className="ams-modal__label">Created At</label>
+                  <div className="ams-modal__input">
+                    {selectedUser.created_at ? new Date(selectedUser.created_at).toLocaleString() : "-"}
+                  </div>
+                </div>
+                <div className="ams-modal__field">
+                  <label className="ams-modal__label">Updated At</label>
+                  <div className="ams-modal__input">
+                    {selectedUser.updated_at ? new Date(selectedUser.updated_at).toLocaleString() : "-"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
