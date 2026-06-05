@@ -11,6 +11,8 @@ import ForgotPassword from "@/pages/ForgotPassword"
 import RequireAuth from "./RequireAuth"
 import { STAFF_ROUTES, USER_ROUTES } from "./layoutRoutes"
 import { renderProtectedLayoutRoute } from "./renderProtectedLayoutRoute"
+//import AdminDashboard from "@/pages/Admin/AdminDashboard"
+import AdminUserManagement from "@/pages/Admin/AdminUserManagement/AdminUserManagement" 
 
 const ADMIN_ROUTES = [
     "/admin/dashboard",
@@ -39,6 +41,26 @@ export default function AppRoutes(): React.ReactElement {
                     layoutVariant: "staff",
                 })
             )}
+            {/*<Route*/}
+            {/*    path="/admin/dashboard"*/}
+            {/*    element={*/}
+            {/*        <RequireAuth requiredRole="ADMIN">*/}
+            {/*            <AdminLayout>*/}
+            {/*                <AdminDashboard />*/}
+            {/*            </AdminLayout>*/}
+            {/*        </RequireAuth>*/}
+            {/*    }*/}
+            {/*/>*/}
+            <Route
+                path="/admin/users"
+                element={
+                    <RequireAuth requiredRole="ADMIN">
+                        <AdminLayout>
+                            <AdminUserManagement />
+                        </AdminLayout>
+                    </RequireAuth>
+                }
+            />
             <Route
                 path="/admin/profile"
                 element={
