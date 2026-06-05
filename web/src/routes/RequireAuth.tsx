@@ -17,7 +17,7 @@ export default function RequireAuth({ children, requiredRole }: RequireAuthProps
     }
 
     if (requiredRole && String(auth.user?.role || "").toUpperCase() !== requiredRole.toUpperCase()) {
-        return <Navigate to="/login" replace />
+        return <Navigate to="/nothing-here" replace />
     }
 
     return children

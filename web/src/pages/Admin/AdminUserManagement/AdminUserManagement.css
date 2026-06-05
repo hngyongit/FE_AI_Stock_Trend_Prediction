@@ -114,6 +114,8 @@
     padding: 0 10px;
     color: var(--foreground);
     font-size: 0.78rem;
+    display: flex;
+    align-items: center;
 }
 
 .ams__actions {
@@ -162,6 +164,30 @@
 }
 
 .ams__table td {
+    color: #dbeafe;
+}
+
+.ams__table-select {
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #0f172a;
+    padding: 0 8px;
+    color: #dbeafe;
+    font-size: 0.74rem;
+    outline: none;
+    cursor: pointer;
+    min-width: 80px;
+    display: flex;
+    align-items: center;
+}
+
+.ams__table-select:focus {
+    border-color: #3b82f6;
+}
+
+.ams__table-select option {
+    background: #1e293b;
     color: #dbeafe;
 }
 
@@ -222,11 +248,13 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     background: #0f172a;
-    padding: 0 10px;
+    padding: 0 12px;
     color: var(--foreground);
     font-size: 0.82rem;
     outline: none;
     transition: border-color 0.15s;
+    display: flex;
+    align-items: center;
 }
 
 .ams-modal__input:focus,
