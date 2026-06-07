@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import MainTabNavigator from '@/app/navigation/MainTabNavigator';
 import { LoginScreen } from '@/features/auth/screens/LoginScreen';
+import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
 import { StartupScreen } from '@/features/startup/screens/StartupScreen';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';
 
@@ -17,6 +18,7 @@ export function RootNavigator() {
       }}>
       <Stack.Screen name="Startup" component={StartupScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
     </Stack.Navigator>
   );

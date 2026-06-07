@@ -15,10 +15,11 @@ const TEXT_MUTED = palette.textSecondary;
 type LoginFieldProps = {
   accessibilityLabel: string;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
-  autoComplete?: 'email' | 'password';
+  autoComplete?: string;
   autoCorrect?: boolean;
   fieldHeight: number;
-  icon: string;
+  icon?: React.ReactNode;
+  iconText?: string;
   inputRef?: React.RefObject<TextInput | null>;
   invalid?: boolean;
   keyboardType?: 'default' | 'email-address';
@@ -29,7 +30,7 @@ type LoginFieldProps = {
   returnKeyType?: 'done' | 'next';
   rightAccessory?: React.ReactNode;
   secureTextEntry?: boolean;
-  textContentType?: 'emailAddress' | 'password';
+  textContentType?: string;
   value: string;
 };
 
@@ -40,6 +41,7 @@ export function LoginField({
   autoCorrect = false,
   fieldHeight,
   icon,
+  iconText,
   inputRef,
   invalid,
   keyboardType,
@@ -86,7 +88,11 @@ export function LoginField({
 
   return (
     <View style={styles.fieldShell}>
-      <Text style={styles.leading}>{icon}</Text>
+      {icon ? (
+        <View style={{ width: '9%', alignItems: 'center' }}>{icon}</View>
+      ) : iconText ? (
+        <Text style={styles.leading}>{iconText}</Text>
+      ) : null}
       <TextInput
         ref={inputRef}
         accessibilityLabel={accessibilityLabel}

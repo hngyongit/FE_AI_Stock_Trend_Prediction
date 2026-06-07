@@ -6,6 +6,8 @@ import type {
   LoginResponse,
   MeResponse,
   RefreshTokenResponse,
+  RegisterCredentials,
+  RegisterResponse,
 } from '@/features/auth/types';
 import { createApiClient } from '@/shared/services/api.service';
 
@@ -130,6 +132,33 @@ export async function fetchCurrentUser(accessToken: string): Promise<AuthSession
   } catch (error) {
     throw new Error(buildNetworkAuthError(error));
   }
+}
+
+// ─── Register ────────────────────────────────────────
+
+export async function registerUser(
+  credentials: RegisterCredentials,
+): Promise<{ success: true; message: string }> {
+  const apiClient = createAuthApiClient();
+  const response = await apiClient.post('/api/auth/register', credentials);
+  const payload = response.data as RegisterResponse;
+
+  if (response.status < 200 || response.status >= 300 || payload.success === false) {
+    const error: Error & { fieldErrors?: RegisterResponse['errors'] } = new Error(
+      payload.message || 'Registration failed. Please try again.',
+    );
+
+    if (payload.errors && payload.errors.length > 0) {
+      error.fieldErrors = payload.errors;
+    }
+
+    throw error;
+  }
+
+  return {
+    success: true,
+    message: payload.message || 'User registered successfully',
+  };
 }
 
 // ─── JWT Helpers ─────────────────────────────────────

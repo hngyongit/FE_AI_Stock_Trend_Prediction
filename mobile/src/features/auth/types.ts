@@ -53,6 +53,36 @@ export type StoredSessionShape = {
   user: AuthUser;
 };
 
+// ─── Register Form ───────────────────────────────────
+
+export type RegisterFormValues = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  agreeTerms: boolean;
+};
+
+// ─── Register API ────────────────────────────────────
+
+export type RegisterCredentials = {
+  full_name: string;
+  email: string;
+  password: string;
+};
+
+export type RegisterResponse = {
+  success: boolean;
+  message: string;
+  data?: {
+    user: AuthUser;
+  };
+  errors?: Array<{
+    field: string;
+    message: string;
+  }>;
+};
+
 // ─── Login Form ──────────────────────────────────────
 
 export type LoginFormValues = {

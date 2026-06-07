@@ -1,5 +1,12 @@
 import { useRef } from 'react';
-import { Alert, TextInput, TextStyle, ViewStyle } from 'react-native';
+import {
+  Alert,
+  TextInput,
+  TextStyle,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 
 import { Box, HStack, Pressable, Spinner, Text, VStack } from '@/shared/ui/primitives';
 import { palette, radius } from '@/shared/design/tokens';
@@ -19,6 +26,7 @@ type LoginFormProps = {
   errorMessage: string | null;
   showPassword: boolean;
   onTogglePassword: () => void;
+  onNavigateToRegister?: () => void;
   metrics: {
     fieldHeight: number;
     bodySize: number;
@@ -33,6 +41,7 @@ export function LoginForm({
   errorMessage,
   showPassword,
   onTogglePassword,
+  onNavigateToRegister,
   metrics,
 }: LoginFormProps) {
   const passwordRef = useRef<TextInput | null>(null);
@@ -80,29 +89,14 @@ export function LoginForm({
       lineHeight: metrics.bodySize * 1.45,
       textAlign: 'center',
     } as TextStyle,
-    button: {
-      alignItems: 'center',
-      backgroundColor: BRAND,
-      borderRadius: radius.card,
-      justifyContent: 'center',
-      minHeight: metrics.buttonHeight,
-      width: '100%',
-    } as ViewStyle,
-    buttonPressed: {
-      opacity: 0.88,
-      transform: [{ scale: 0.995 }],
-    } as ViewStyle,
-    buttonDisabled: {
-      opacity: 0.6,
-    } as ViewStyle,
     buttonText: {
-      color: '#08111A',
+      color: '#FFFFFF',
       fontSize: metrics.bodySize * 1.03,
       fontWeight: '800',
       letterSpacing: metrics.bodySize * 0.02,
     } as TextStyle,
     buttonArrow: {
-      color: '#08111A',
+      color: '#FFFFFF',
       fontSize: metrics.bodySize * 1.12,
       fontWeight: '800',
       marginLeft: '2%',
@@ -147,7 +141,7 @@ export function LoginForm({
           accessibilityLabel="Email address"
           autoComplete="email"
           fieldHeight={metrics.fieldHeight}
-          icon="@"
+          icon={<Mail color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
           invalid={Boolean(formik.touched.email && formik.errors.email)}
           keyboardType="email-address"
           onBlur={() => formik.setFieldTouched('email')}
@@ -181,7 +175,7 @@ export function LoginForm({
           accessibilityLabel="Password"
           autoComplete="password"
           fieldHeight={metrics.fieldHeight}
-          icon="*"
+          icon={<Lock color={palette.textSecondary} size={metrics.fieldHeight * 0.33} />}
           inputRef={passwordRef}
           invalid={Boolean(formik.touched.password && formik.errors.password)}
           onBlur={() => formik.setFieldTouched('password')}
@@ -195,7 +189,7 @@ export function LoginForm({
               accessibilityRole="button"
               onPress={onTogglePassword}
               style={{ alignItems: 'center', justifyContent: 'center', minWidth: '14%', paddingVertical: '2%' }}>
-              <Text style={styles.toggleText}>{showPassword ? 'HIDE' : 'SHOW'}</Text>
+              {showPassword ? <EyeOff color={BRAND} size={metrics.fieldHeight * 0.33} /> : <Eye color={BRAND} size={metrics.fieldHeight * 0.33} />}
             </Pressable>
           }
           secureTextEntry={!showPassword}
@@ -229,19 +223,26 @@ export function LoginForm({
       ) : null}
 
       {/* Submit Button */}
-      <Pressable
+      <TouchableOpacity
         accessibilityRole="button"
+        activeOpacity={0.88}
         disabled={formik.isSubmitting}
         onPress={() => formik.handleSubmit()}
-        style={({ pressed }: { pressed: boolean }) => [
-          styles.button,
-          pressed && !formik.isSubmitting && styles.buttonPressed,
-          formik.isSubmitting && styles.buttonDisabled,
-        ]}>
+        style={{
+          alignItems: 'center',
+          backgroundColor: palette.primary,
+          borderRadius: radius.card,
+          justifyContent: 'center',
+          minHeight: metrics.buttonHeight,
+          paddingHorizontal: 24,
+          paddingVertical: 12,
+          width: '100%',
+          opacity: formik.isSubmitting ? 0.6 : 1,
+        }}>
         <HStack style={{ alignItems: 'center', justifyContent: 'center' }}>
           {formik.isSubmitting ? (
             <>
-              <Spinner color="#08111A" size="small" />
+              <Spinner color="#FFFFFF" size="small" />
               <Text style={[styles.buttonText, { marginLeft: '3%' }]}>Signing in</Text>
             </>
           ) : (
@@ -251,7 +252,19 @@ export function LoginForm({
             </>
           )}
         </HStack>
-      </Pressable>
+      </TouchableOpacity>
+
+      {/* Navigate to Register */}
+      {onNavigateToRegister ? (
+        <HStack style={{ alignItems: 'center', justifyContent: 'center', paddingTop: '1%' }}>
+          <Text style={[{ color: palette.textSecondary, fontSize: metrics.bodySize * 0.92, lineHeight: metrics.bodySize * 1.5 } as TextStyle]}>
+            Don&apos;t have an account?{' '}
+          </Text>
+          <Pressable onPress={onNavigateToRegister}>
+            <Text style={[styles.forgotText, { fontSize: metrics.bodySize * 0.92 }]}>Register</Text>
+          </Pressable>
+        </HStack>
+      ) : null}
     </VStack>
   );
 }
