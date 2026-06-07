@@ -115,6 +115,33 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
   }
 }
 
+export async function logoutCurrentSession(accessToken: string): Promise<void> {
+  try {
+    const apiClient = createAuthApiClient();
+    const response = await apiClient.post(
+      '/api/auth/logout',
+      undefined,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    const payload = response.data as { success?: boolean; message?: string };
+
+    if (response.status < 200 || response.status >= 300 || payload.success === false) {
+      throw new Error(payload.message || 'Unable to log out right now.');
+    }
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(buildNetworkAuthError(error));
+    }
+
+    throw error;
+  }
+}
+
 export async function fetchCurrentUser(accessToken: string): Promise<AuthSession['user']> {
   try {
     const apiClient = createAuthApiClient();

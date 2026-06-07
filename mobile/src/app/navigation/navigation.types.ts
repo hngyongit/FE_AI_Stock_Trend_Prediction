@@ -9,11 +9,11 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
+  EditProfile: undefined;
   StockDetail: { symbol: string };
   CreateAlert: { symbol?: string };
   EditAlert: { alertId: string };
   NotificationCenter: undefined;
-  Settings: undefined;
   ChangePassword: undefined;
 };
 
