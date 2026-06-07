@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import {
-  Animated,
-  Easing,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -24,11 +22,8 @@ import { palette, radius, spacing } from '@/shared/design/tokens';
 export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
-  const cardOpacity = useRef(new Animated.Value(0)).current;
-  const cardOffset = useRef(new Animated.Value(18)).current;
-  const [showPassword, setShowPassword] = useState(false);
 
-  const { formik, errorMessage } = useLoginForm(() => {
+  const { formik, errorMessage, showPassword, setShowPassword } = useLoginForm(() => {
     navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
   });
 
@@ -48,13 +43,6 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
       glowSize: width * 0.68,
     };
   }, [height, width]);
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(cardOpacity, { duration: 340, easing: Easing.out(Easing.quad), toValue: 1, useNativeDriver: true }),
-      Animated.timing(cardOffset, { duration: 340, easing: Easing.out(Easing.quad), toValue: 0, useNativeDriver: true }),
-    ]).start();
-  }, [cardOffset, cardOpacity]);
 
   const styles = StyleSheet.create({
     root: { backgroundColor: palette.background, flex: 1 } as ViewStyle,
@@ -86,7 +74,7 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
               contentContainerStyle={styles.scrollContent}
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}>
-              <Animated.View style={{ opacity: cardOpacity, transform: [{ translateY: cardOffset }], alignItems: 'center' }}>
+              <View style={{ alignItems: 'center' }}>
                 <Box style={{ width: metrics.cardWidth, alignItems: 'center' }}>
                   <Card style={styles.card}>
                     <LoginHeader metrics={metrics} />
@@ -96,11 +84,12 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
                       errorMessage={errorMessage}
                       showPassword={showPassword}
                       onTogglePassword={() => setShowPassword((v) => !v)}
+                      onNavigateToRegister={() => navigation.navigate('Register')}
                       metrics={metrics}
                     />
                   </Card>
                 </Box>
-              </Animated.View>
+              </View>
             </ScrollView>
           </KeyboardAvoidingView>
         </View>
