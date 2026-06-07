@@ -11,17 +11,16 @@ module.exports = function (api) {
           root: ['./'],
 
           alias: {
-            '@/assets': './assets',
-            '@/components/ui/gluestack-ui-provider': './components/ui/gluestack-ui-provider',
-            '@/components/ui': './src/components/ui',
-            '@/components': './src/components',
-            '@/constants': './src/constants',
-            '@/hooks': './src/hooks',
             '@': './src',
-            'tailwind.config': './tailwind.config.js',
+            '@/app': './src/app',
+            '@/shared': './src/shared',
+            '@/features': './src/features',
+            '@/stores': './src/stores',
+            '@/assets': './assets',
           },
         },
       ],
+      'react-native-reanimated/plugin',
     ],
   };
 };

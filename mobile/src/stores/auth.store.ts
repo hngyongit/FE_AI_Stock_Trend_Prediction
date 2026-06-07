@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import type { AuthSession } from '@/features/auth/auth.service';
+import type { AuthSession } from '@/features/auth/types';
 
 type AuthStore = {
   errorMessage: string | null;

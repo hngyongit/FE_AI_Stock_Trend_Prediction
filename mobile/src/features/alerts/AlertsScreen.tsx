@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
-import { Text } from '../../../components/ui/text';
-import { FeaturePlaceholderScreen } from '@/shared/components/FeaturePlaceholderScreen';
+import { Text } from '@/shared/ui/primitives';
+import { FeaturePlaceholderScreen } from '@/shared/ui/components/FeaturePlaceholderScreen';
 import { palette } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
