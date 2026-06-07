@@ -1,10 +1,12 @@
 import {
   clearPersistedSession,
+  readPersistedSession,
+} from '@/shared/services/tokenStorage';
+import {
   getRoleAccessMessage,
   isMobileAllowedRole,
   isTokenExpired,
-  readPersistedSession,
-} from '@/features/auth/auth.service';
+} from '@/features/auth/services/auth.service';
 
 type StartupDestination = '/dashboard' | '/login';
 

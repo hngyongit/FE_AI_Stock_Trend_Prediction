@@ -1,4 +1,4 @@
-import { FeaturePlaceholderScreen } from '@/shared/components/FeaturePlaceholderScreen';
+import { FeaturePlaceholderScreen } from '@/shared/ui/components/FeaturePlaceholderScreen';
 
 export function SearchScreen() {
   return (
