@@ -75,7 +75,10 @@ export function WatchlistScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: WatchlistItem }) => (
-      <SwipeableRow onDelete={() => removeItem(item.stock.symbol)}>
+      <SwipeableRow
+        onDelete={() => removeItem(item.stock.symbol)}
+        resetKey={item.watchlist_id}
+      >
         <WatchlistRow
           item={item}
           onPress={(symbol) => navigation.navigate('StockDetail', { symbol })}

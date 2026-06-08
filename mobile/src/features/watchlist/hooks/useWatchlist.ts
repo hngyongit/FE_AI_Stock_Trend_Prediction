@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { LayoutAnimation, Platform, UIManager } from 'react-native';
 
 import type { WatchlistItem } from '../types';
 import { fetchWatchlists, removeFromWatchlist } from '../services/watchlist.service';
+
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 export function useWatchlist() {
     const [items, setItems] = useState<WatchlistItem[]>([]);
@@ -33,6 +38,7 @@ export function useWatchlist() {
         deletingSymbolsRef.current.add(symbol);
 
         // Optimistically remove from local state
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setItems((prev) => prev.filter((item) => item.stock.symbol !== symbol));
         try {
             await removeFromWatchlist(symbol);
@@ -46,6 +52,7 @@ export function useWatchlist() {
     }, [load]);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         void load();
     }, [load]);
 
