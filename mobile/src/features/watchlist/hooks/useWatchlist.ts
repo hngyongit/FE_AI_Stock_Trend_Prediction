@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { WatchlistItem } from '../types';
 import { fetchWatchlists, removeFromWatchlist } from '../services/watchlist.service';
@@ -7,6 +7,7 @@ export function useWatchlist() {
     const [items, setItems] = useState<WatchlistItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const deletingSymbolsRef = useRef(new Set<string>());
 
     const load = useCallback(async () => {
         try {
@@ -25,6 +26,12 @@ export function useWatchlist() {
     }, []);
 
     const removeItem = useCallback(async (symbol: string) => {
+        if (deletingSymbolsRef.current.has(symbol)) {
+            return;
+        }
+
+        deletingSymbolsRef.current.add(symbol);
+
         // Optimistically remove from local state
         setItems((prev) => prev.filter((item) => item.stock.symbol !== symbol));
         try {
@@ -33,6 +40,8 @@ export function useWatchlist() {
             // Revert on failure by reloading
             setError(err instanceof Error ? err.message : 'Failed to remove');
             void load();
+        } finally {
+            deletingSymbolsRef.current.delete(symbol);
         }
     }, [load]);
 
