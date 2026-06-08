@@ -27,13 +27,15 @@ const profileChildScreenOptions: NativeStackNavigationOptions = {
 };
 
 const detailScreenOptions: NativeStackNavigationOptions = {
-  animation: 'none',
+  animationDuration: 100,
   contentStyle: {
     backgroundColor: palette.background,
   },
   gestureEnabled: true,
+  gestureDirection: 'vertical',
   headerShown: false,
   navigationBarColor: palette.background,
+  presentation: 'modal',
   statusBarBackgroundColor: palette.background,
 };
 
