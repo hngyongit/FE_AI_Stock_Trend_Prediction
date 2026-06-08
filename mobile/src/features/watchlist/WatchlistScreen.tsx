@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 
 function ListSeparator() {
@@ -14,6 +15,7 @@ import { WatchlistSearchBar } from '@/features/watchlist/components/WatchlistSea
 import { WatchlistFilterChips } from '@/features/watchlist/components/WatchlistFilterChips';
 import { WatchlistRow } from '@/features/watchlist/components/WatchlistRow';
 import { SwipeableRow } from '@/features/watchlist/components/SwipeableRow';
+import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
 import type { WatchlistItem } from '@/features/watchlist/types';
 
 function EmptyWatchlistState() {
@@ -40,6 +42,7 @@ function ErrorWatchlistState({ message, onRetry }: { message: string; onRetry: (
 }
 
 export function WatchlistScreen() {
+  const navigation = useNavigation<MainTabScreenProps<'Watchlist'>['navigation']>();
   const insets = useSafeAreaInsets();
   const { items, isLoading, error, refresh, removeItem } = useWatchlist();
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,10 +76,13 @@ export function WatchlistScreen() {
   const renderItem = useCallback(
     ({ item }: { item: WatchlistItem }) => (
       <SwipeableRow onDelete={() => removeItem(item.stock.symbol)}>
-        <WatchlistRow item={item} onPress={() => { }} />
+        <WatchlistRow
+          item={item}
+          onPress={(symbol) => navigation.navigate('StockDetail', { symbol })}
+        />
       </SwipeableRow>
     ),
-    [removeItem],
+    [navigation, removeItem],
   );
 
   const renderListHeader = useCallback(
