@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 import { Text } from '@/shared/ui';
@@ -18,6 +18,16 @@ export function DashboardScreen() {
         <Text style={styles.body}>
           Main operational dashboard modules will appear here.
         </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => navigation.navigate('StockDetail', { symbol: 'FPT' })}
+          style={styles.stockCard}>
+          <View>
+            <Text style={styles.stockSymbol}>FPT</Text>
+            <Text style={styles.stockName}>FPT CORPORATION</Text>
+          </View>
+          <Text style={styles.stockAction}>View</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -52,5 +62,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     maxWidth: '90%',
+  },
+  stockAction: {
+    color: palette.primary,
+    fontSize: 13,
+    fontWeight: '800',
+    lineHeight: 18,
+  },
+  stockCard: {
+    alignItems: 'center',
+    backgroundColor: palette.surface,
+    borderColor: palette.border,
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+    padding: spacing.md,
+  },
+  stockName: {
+    color: palette.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 16,
+    marginTop: spacing.xs,
+  },
+  stockSymbol: {
+    color: palette.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+    lineHeight: 22,
   },
 });

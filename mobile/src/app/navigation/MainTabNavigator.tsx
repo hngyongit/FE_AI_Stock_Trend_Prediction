@@ -101,7 +101,7 @@ export default function MainTabNavigator() {
     <Tab.Navigator
       backBehavior="history"
       screenOptions={{
-        freezeOnBlur: false,
+        freezeOnBlur: true,
         headerShown: false,
         lazy: true,
         sceneStyle: {

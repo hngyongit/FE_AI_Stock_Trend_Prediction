@@ -7,6 +7,7 @@ import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
 import { ChangePasswordScreen } from '@/features/profile/screens/ChangePasswordScreen';
 import { EditProfileScreen } from '@/features/profile/screens/EditProfileScreen';
 import { StartupScreen } from '@/features/startup/screens/StartupScreen';
+import { StockDetailScreen } from '@/features/stocks/screens/StockDetailScreen';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';
 import { palette } from '@/shared/design/tokens';
 
@@ -22,6 +23,19 @@ const profileChildScreenOptions: NativeStackNavigationOptions = {
     backgroundColor: palette.background,
   },
   navigationBarColor: palette.background,
+  statusBarBackgroundColor: palette.background,
+};
+
+const detailScreenOptions: NativeStackNavigationOptions = {
+  animationDuration: 100,
+  contentStyle: {
+    backgroundColor: palette.background,
+  },
+  gestureEnabled: true,
+  gestureDirection: 'vertical',
+  headerShown: false,
+  navigationBarColor: palette.background,
+  presentation: 'modal',
   statusBarBackgroundColor: palette.background,
 };
 
@@ -53,6 +67,11 @@ export function RootNavigator() {
         name="EditProfile"
         component={EditProfileScreen}
         options={profileChildScreenOptions}
+      />
+      <Stack.Screen
+        name="StockDetail"
+        component={StockDetailScreen}
+        options={detailScreenOptions}
       />
       <Stack.Screen
         name="ChangePassword"
