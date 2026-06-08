@@ -1,5 +1,4 @@
-// GlueStack primitives — controlled wrappers only.
-// Do NOT add components not listed in the GlueStack Component Map (§5 of MOBILE_DEV_RULES.md).
+// Shared UI primitives barrel exports.
 // Feature screens must import from "@/shared/ui", never from here directly.
 
 export { Box } from './box';
@@ -8,7 +7,7 @@ export { HStack } from './hstack';
 export { Divider } from './divider';
 export { Text } from './text';
 export { Pressable } from './pressable';
-export { Button } from './button';
+export { Button, ButtonText, ButtonIcon, ButtonGroup } from './button';
 export { Input } from './input';
 export { Checkbox } from './checkbox';
 export { Switch } from './switch';
@@ -17,4 +16,8 @@ export { Toast } from './toast';
 export { Modal } from './modal';
 export { Skeleton } from './skeleton';
 export { Card } from './card';
-export { GluestackUIProvider } from './gluestack-ui-provider';
+export { Avatar, AvatarBadge, AvatarGroup } from './avatar';
+export { Badge, BadgeText, BadgeIcon } from './badge';
+export { Icon } from './icon';
+export { ThemeProvider } from '../utils/ThemeProvider';
+export { useToast } from '../utils/ThemeProvider';

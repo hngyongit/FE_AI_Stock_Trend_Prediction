@@ -18,7 +18,13 @@ export { Input, Checkbox, Switch } from './primitives';
 export { Spinner, Toast, Modal, Skeleton } from './primitives';
 
 // Provider
-export { GluestackUIProvider } from './primitives';
+export { ThemeProvider } from './primitives';
+export { useToast } from './primitives';
+
+// Icons
+export { Icon } from './primitives';
+export { Avatar, AvatarBadge, AvatarGroup } from './primitives';
+export { Badge, BadgeText, BadgeIcon } from './primitives';
 
 // Shared composed components (added as they are migrated)
 export { MetricCard } from './components/MetricCard';

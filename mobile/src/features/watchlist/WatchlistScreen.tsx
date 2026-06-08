@@ -74,17 +74,21 @@ export function WatchlistScreen() {
   }, [items, searchQuery, activeChip]);
 
   const renderItem = useCallback(
-    ({ item }: { item: WatchlistItem }) => (
-      <SwipeableRow
-        onDelete={() => removeItem(item.stock.symbol)}
-        resetKey={item.watchlist_id}
-      >
-        <WatchlistRow
-          item={item}
-          onPress={(symbol) => navigation.navigate('StockDetail', { symbol })}
-        />
-      </SwipeableRow>
-    ),
+    ({ item }: { item: WatchlistItem }) => {
+      return (
+        <SwipeableRow
+          symbol={item.stock.symbol}
+          onDelete={(symbol) => {
+            removeItem(symbol);
+          }}
+        >
+          <WatchlistRow
+            item={item}
+            onPress={(symbol) => navigation.navigate('StockDetail', { symbol })}
+          />
+        </SwipeableRow>
+      );
+    },
     [navigation, removeItem],
   );
 
