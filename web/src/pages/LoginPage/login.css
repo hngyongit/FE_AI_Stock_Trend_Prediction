@@ -198,3 +198,67 @@
     gap: 12px;
     color: #475569;
 }
+
+.social-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: #64748b;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.social-divider::before,
+.social-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+}
+
+.social-divider:not(:empty)::before {
+    margin-right: .75em;
+}
+
+.social-divider:not(:empty)::after {
+    margin-left: .75em;
+}
+
+.google-login-button {
+    height: 36px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #243142;
+    background: #0c1119;
+    color: #e2e8f0;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(2, 6, 23, 0.2);
+}
+
+.google-login-button:hover {
+    background: #141b25;
+    border-color: #3b82f6/50;
+    color: #ffffff;
+}
+
+.google-login-button:focus-visible {
+    outline: none;
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.35);
+}
+
+.google-login-button:active {
+    background: #090d14;
+}
+
+.google-icon {
+    flex-shrink: 0;
+}
