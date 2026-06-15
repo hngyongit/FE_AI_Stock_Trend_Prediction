@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Loader2, AlertTriangle, ArrowRight } from "lucide-react"
 import { useAuth } from "@/providers/AuthProvider"
-import { exchangeOAuthCode } from "@/services/auth.service"
+import { exchangeOAuthCode, getOAuthRedirectUri } from "@/services/auth.service"
 import { Button } from "@/components/ui/button"
 
 export default function AuthCallbackPage() {
@@ -42,7 +42,7 @@ export default function AuthCallbackPage() {
 
         async function processCallback() {
             try {
-                const response = await exchangeOAuthCode(code!)
+                const response = await exchangeOAuthCode(code!, getOAuthRedirectUri())
                 const authData = response?.data
 
                 if (!authData?.access_token || !authData?.refresh_token || !authData?.user) {

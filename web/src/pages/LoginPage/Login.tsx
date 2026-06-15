@@ -13,7 +13,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { login } from "@/services/auth.service.ts"
+import { getApiBaseUrl, getOAuthRedirectUri, login } from "@/services/auth.service.ts"
 import { useAuth } from "@/providers/AuthProvider"
 import { Input } from "@/components/ui/input"
 import "./login.css"
@@ -58,8 +58,10 @@ export default function LoginPage() {
     const [errors, setErrors] = useState<LoginErrors>({})
 
     const handleGoogleLogin = () => {
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? ""
-        window.location.href = `${apiBaseUrl}/api/auth/google`
+        const apiBaseUrl = getApiBaseUrl()
+        const redirectUri = getOAuthRedirectUri()
+        const query = new URLSearchParams({ redirect_uri: redirectUri })
+        window.location.href = `${apiBaseUrl}/api/auth/google?${query.toString()}`
     }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

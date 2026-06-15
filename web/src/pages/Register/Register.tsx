@@ -4,7 +4,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useFormik } from "formik"
 import { object, string, ref, boolean } from "yup"
 
-import { register } from "@/services/auth.service"
+import { getApiBaseUrl, getOAuthRedirectUri, register } from "@/services/auth.service"
 import "./Register.css"
 
 /* ── Types ──────────────────────────────────────────── */
@@ -73,8 +73,10 @@ export default function Register() {
     }, [searchParams])
 
     const handleGoogleRegister = () => {
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? ""
-        window.location.href = `${apiBaseUrl}/api/auth/google/register`
+        const apiBaseUrl = getApiBaseUrl()
+        const redirectUri = getOAuthRedirectUri()
+        const query = new URLSearchParams({ redirect_uri: redirectUri })
+        window.location.href = `${apiBaseUrl}/api/auth/google/register?${query.toString()}`
     }
 
     const formik = useFormik<RegisterFormValues>({

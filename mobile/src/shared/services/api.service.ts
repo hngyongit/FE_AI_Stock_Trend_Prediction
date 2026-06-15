@@ -3,6 +3,13 @@ import Constants from 'expo-constants';
 
 const DEFAULT_API_BASE_URL = 'https://lobster-app-kte4b.ondigitalocean.app';
 
+function normalizeApiBaseUrl(value?: string) {
+  const trimmed = value?.trim();
+  if (!trimmed) return '';
+
+  return trimmed.replace(/\/+$/, '').replace(/\/api$/, '');
+}
+
 function getEnvValue(key: string) {
   const runtimeProcess = globalThis as typeof globalThis & {
     process?: {
@@ -30,7 +37,7 @@ function getExtraValue(key: string) {
 }
 
 export function getApiBaseUrl() {
-  return (
+  return normalizeApiBaseUrl(
     getEnvValue('EXPO_PUBLIC_API_URL') ??
     getExtraValue('apiBaseUrl') ??
     getExtraValue('EXPO_PUBLIC_API_URL') ??

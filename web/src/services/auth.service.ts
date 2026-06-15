@@ -1,6 +1,23 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from "axios"
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ?? ""
+function normalizeApiBaseUrl(value?: string) {
+    const trimmed = value?.trim()
+    if (!trimmed) return ""
+
+    return trimmed.replace(/\/+$/, "").replace(/\/api$/, "")
+}
+
+export function getApiBaseUrl() {
+    return normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
+}
+
+export function getOAuthRedirectUri() {
+    if (typeof window === "undefined") return ""
+
+    return `${window.location.origin}/auth/callback`
+}
+
+const API_BASE_URL = getApiBaseUrl()
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
 })
@@ -129,11 +146,14 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
     return payload
 }
 
-export async function exchangeOAuthCode(code: string): Promise<LoginResponse> {
+export async function exchangeOAuthCode(code: string, redirectUri?: string): Promise<LoginResponse> {
     let payload: LoginResponse
 
     try {
-        const response = await apiClient.post<LoginResponse>("/api/auth/oauth/exchange", { code })
+        const response = await apiClient.post<LoginResponse>("/api/auth/oauth/exchange", {
+            code,
+            ...(redirectUri ? { redirect_uri: redirectUri } : {}),
+        })
         payload = response.data
     } catch (error) {
         throw new Error(getAxiosErrorMessage(error, "Google authentication failed"), { cause: error })
