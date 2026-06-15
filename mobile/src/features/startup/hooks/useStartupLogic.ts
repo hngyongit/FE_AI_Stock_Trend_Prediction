@@ -14,6 +14,7 @@ export function useStartupLogic(
   const spinner = useRef(new Animated.Value(0)).current;
   const fade = useRef(new Animated.Value(0)).current;
   const detailOpacity = useRef(new Animated.Value(0.72)).current;
+  const progressSweep = useRef(new Animated.Value(0)).current;
 
   const {
     beginInitialization, canRetry, completeInitialization, errorMessage,
@@ -36,10 +37,19 @@ export function useStartupLogic(
       Animated.timing(detailOpacity, { duration: 1200, easing: Easing.inOut(Easing.quad), toValue: 1, useNativeDriver: true }),
       Animated.timing(detailOpacity, { duration: 1200, easing: Easing.inOut(Easing.quad), toValue: 0.62, useNativeDriver: true }),
     ]));
+    const progressLoop = Animated.loop(
+      Animated.timing(progressSweep, {
+        duration: 1700,
+        easing: Easing.inOut(Easing.quad),
+        toValue: 1,
+        useNativeDriver: true,
+      }),
+    );
     rotationLoop.start();
     opacityLoop.start();
-    return () => { rotationLoop.stop(); opacityLoop.stop(); };
-  }, [detailOpacity, spinner]);
+    progressLoop.start();
+    return () => { rotationLoop.stop(); opacityLoop.stop(); progressLoop.stop(); };
+  }, [detailOpacity, progressSweep, spinner]);
 
   // Initialization logic
   useEffect(() => {
@@ -86,6 +96,20 @@ export function useStartupLogic(
     navigation, resetRetryState, retryKey, setSession, triggerRetry, updateStatus]);
 
   const rotation = spinner.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
+  const progressTranslate = progressSweep.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-96, 260],
+  });
 
-  return { fade, rotation, detailOpacity, statusText, errorMessage, canRetry, retryKey, triggerRetry };
+  return {
+    fade,
+    rotation,
+    detailOpacity,
+    progressTranslate,
+    statusText,
+    errorMessage,
+    canRetry,
+    retryKey,
+    triggerRetry,
+  };
 }
