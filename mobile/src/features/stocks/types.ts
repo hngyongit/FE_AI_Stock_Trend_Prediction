@@ -17,6 +17,34 @@ export type StockChartResponse = {
   data: StockChartPoint[];
 };
 
+export type StockListItem = {
+  symbol: string;
+  companyName: string | null;
+  market: string | null;
+  industry: string | null;
+  sector: string | null;
+  status: string | null;
+  latestClosePrice: number | null;
+  change: number | null;
+  changePercent: number | null;
+  volume: number | null;
+  marketCap: number | null;
+  lastUpdated: string | null;
+  source: string | null;
+  dataStatus: string | null;
+};
+
+export type StockListResponse = {
+  success?: boolean;
+  message?: string;
+  data: StockListItem[];
+  meta?: {
+    total?: number;
+    lastUpdated?: string;
+    source?: string;
+  };
+};
+
 export type PriceStats = {
   latestPrice: number | null;
   previousPrice: number | null;

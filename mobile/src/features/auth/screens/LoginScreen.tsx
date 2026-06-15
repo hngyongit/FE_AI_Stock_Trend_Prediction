@@ -23,7 +23,7 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
   const insets = useSafeAreaInsets();
   const { height, width } = useWindowDimensions();
 
-  const { formik, errorMessage, showPassword, setShowPassword } = useLoginForm(() => {
+  const { formik, errorMessage, handleGoogleLogin, isGoogleSubmitting, showPassword, setShowPassword } = useLoginForm(() => {
     navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
   });
 
@@ -82,6 +82,8 @@ export function LoginScreen({ navigation }: RootScreenProps<'Login'>) {
                     <LoginForm
                       formik={formik}
                       errorMessage={errorMessage}
+                      isGoogleSubmitting={isGoogleSubmitting}
+                      onGoogleLogin={handleGoogleLogin}
                       showPassword={showPassword}
                       onTogglePassword={() => setShowPassword((v) => !v)}
                       onNavigateToRegister={() => navigation.navigate('Register')}

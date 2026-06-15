@@ -1,4 +1,6 @@
 import axios from 'axios';
+import * as Linking from 'expo-linking';
+import * as WebBrowser from 'expo-web-browser';
 
 import type {
   AuthSession,
@@ -9,7 +11,9 @@ import type {
   RegisterCredentials,
   RegisterResponse,
 } from '@/features/auth/types';
-import { createApiClient } from '@/shared/services/api.service';
+import { createApiClient, getApiBaseUrl } from '@/shared/services/api.service';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export function createAuthApiClient() {
   return createApiClient();
@@ -53,6 +57,25 @@ export function getRoleAccessMessage(role: string) {
   return 'Your account is not permitted to access the mobile dashboard.';
 }
 
+function toAuthSession(payload: LoginResponse, fallbackMessage: string): AuthSession {
+  const data = payload.data;
+
+  if (
+    payload.success === false ||
+    !data?.access_token ||
+    !data?.refresh_token ||
+    !data?.user
+  ) {
+    throw new Error(buildFriendlyAuthError(payload.message ?? fallbackMessage));
+  }
+
+  return {
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    user: data.user,
+  } satisfies AuthSession;
+}
+
 export async function loginWithCredentials(
   credentials: LoginCredentials
 ): Promise<AuthSession> {
@@ -64,30 +87,80 @@ export async function loginWithCredentials(
     });
 
     const payload = response.data as LoginResponse;
-    const data = payload.data;
-
-    if (
-      response.status < 200 ||
-      response.status >= 300 ||
-      payload.success === false ||
-      !data?.access_token ||
-      !data?.refresh_token ||
-      !data?.user
-    ) {
+    if (response.status < 200 || response.status >= 300) {
       throw new Error(buildFriendlyAuthError(payload.message));
     }
 
-    return {
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token,
-      user: data.user,
-    } satisfies AuthSession;
+    return toAuthSession(payload, 'Unable to sign in right now. Please try again.');
   } catch (error) {
     if (axios.isAxiosError(error)) {
       throw new Error(buildNetworkAuthError(error));
     }
     throw error;
   }
+}
+
+export async function exchangeOAuthCode(code: string): Promise<AuthSession> {
+  try {
+    const apiClient = createAuthApiClient();
+    const response = await apiClient.post('/api/auth/oauth/exchange', { code });
+    const payload = response.data as LoginResponse;
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(payload.message || 'Google authentication failed');
+    }
+
+    return toAuthSession(payload, 'Google authentication failed');
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(buildNetworkAuthError(error));
+    }
+
+    throw error;
+  }
+}
+
+export async function loginWithGoogle(): Promise<AuthSession | null> {
+  const redirectUri = Linking.createURL('auth/callback');
+  const apiBaseUrl = getApiBaseUrl().replace(/\/$/, '');
+  const authUrl = `${apiBaseUrl}/api/auth/google?redirect_uri=${encodeURIComponent(redirectUri)}`;
+
+  const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUri);
+
+  if (result.type === 'cancel' || result.type === 'dismiss') {
+    return null;
+  }
+
+  if (result.type !== 'success' || !result.url) {
+    throw new Error('Google authentication did not complete.');
+  }
+
+  const { queryParams } = Linking.parse(result.url);
+  const code = readQueryParam(queryParams?.code);
+  const error = readQueryParam(queryParams?.error);
+
+  if (error) {
+    throw new Error(
+      error === 'google_auth_failed'
+        ? 'Google authentication failed. Please try again.'
+        : error,
+    );
+  }
+
+  if (!code) {
+    throw new Error('No authorization code was returned from Google.');
+  }
+
+  return exchangeOAuthCode(code);
+}
+
+function readQueryParam(value: unknown): string | null {
+  if (typeof value === 'string' && value.trim()) return value;
+  if (Array.isArray(value)) {
+    const firstString = value.find((item) => typeof item === 'string' && item.trim());
+    return typeof firstString === 'string' ? firstString : null;
+  }
+  return null;
 }
 
 export async function refreshAccessToken(refreshToken: string): Promise<string> {
