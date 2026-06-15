@@ -2,8 +2,16 @@ import { useEffect, useState, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { Loader2, AlertTriangle, ArrowRight } from "lucide-react"
 import { useAuth } from "@/providers/AuthProvider"
-import { exchangeOAuthCode, getOAuthRedirectUri } from "@/services/auth.service"
+import { exchangeOAuthCode, getOAuthRedirectUri, readAuthSession } from "@/services/auth.service"
 import { Button } from "@/components/ui/button"
+
+const processedOAuthCodes = new Set<string>()
+const inFlightOAuthExchanges = new Map<string, Promise<Awaited<ReturnType<typeof exchangeOAuthCode>>>>()
+
+function getDestinationFromStoredSession() {
+    const role = String(readAuthSession()?.user?.role || "").toUpperCase()
+    return role === "ADMIN" ? "/admin/dashboard" : role === "STAFF" ? "/staff/dashboard" : "/dashboard"
+}
 
 export default function AuthCallbackPage() {
     const navigate = useNavigate()
@@ -18,7 +26,7 @@ export default function AuthCallbackPage() {
         if (initiated.current) return
         initiated.current = true
 
-        const code = searchParams.get("code")
+        const codeParam = searchParams.get("code")
         const urlError = searchParams.get("error")
 
         if (urlError) {
@@ -34,15 +42,30 @@ export default function AuthCallbackPage() {
             return
         }
 
-        if (!code) {
+        if (!codeParam) {
             setError("No authorization code provided from Google.")
             setIsProcessing(false)
             return
         }
 
+        const code = codeParam
+
+        if (processedOAuthCodes.has(code)) {
+            navigate(getDestinationFromStoredSession(), { replace: true })
+            return
+        }
+
         async function processCallback() {
             try {
-                const response = await exchangeOAuthCode(code!, getOAuthRedirectUri())
+                let exchangeRequest = inFlightOAuthExchanges.get(code)
+                if (!exchangeRequest) {
+                    exchangeRequest = exchangeOAuthCode(code, getOAuthRedirectUri())
+                    inFlightOAuthExchanges.set(code, exchangeRequest)
+                }
+
+                const response = await exchangeRequest
+                processedOAuthCodes.add(code)
+                inFlightOAuthExchanges.delete(code)
                 const authData = response?.data
 
                 if (!authData?.access_token || !authData?.refresh_token || !authData?.user) {
@@ -65,7 +88,18 @@ export default function AuthCallbackPage() {
                 const destination = role === "ADMIN" ? "/admin/dashboard" : role === "STAFF" ? "/staff/dashboard" : "/dashboard"
                 navigate(destination, { replace: true })
             } catch (err) {
+                inFlightOAuthExchanges.delete(code)
                 const message = err instanceof Error ? err.message : "Authentication failed"
+
+                if (
+                    message.toLowerCase().includes("invalid or expired exchange code") &&
+                    readAuthSession()?.accessToken
+                ) {
+                    processedOAuthCodes.add(code)
+                    navigate(getDestinationFromStoredSession(), { replace: true })
+                    return
+                }
+
                 setError(message)
                 setIsProcessing(false)
             }
