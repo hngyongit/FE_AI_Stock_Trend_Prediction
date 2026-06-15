@@ -18,7 +18,11 @@ export function useStartupScreenStyles(insets: { top: number; bottom: number }) 
           flex: 1,
         },
         gridBackground: {
-          ...StyleSheet.absoluteFillObject,
+          bottom: 0,
+          left: 0,
+          position: 'absolute',
+          right: 0,
+          top: 0,
           justifyContent: 'space-between',
           paddingVertical: 10,
         },

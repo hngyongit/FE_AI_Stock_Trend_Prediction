@@ -9,6 +9,7 @@ import {
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 
 import { Box, HStack, Pressable, Spinner, Text, VStack } from '@/shared/ui/primitives';
+import { GoogleAuthButton } from '@/features/auth/components/GoogleAuthButton';
 import { palette, radius } from '@/shared/design/tokens';
 import { LoginField } from '@/features/auth/components/LoginField';
 import type { LoginFormValues } from '@/features/auth/types';
@@ -24,7 +25,9 @@ type LoginFormProps = {
     setFieldTouched: (field: string) => void;
   };
   errorMessage: string | null;
+  isGoogleSubmitting: boolean;
   showPassword: boolean;
+  onGoogleLogin: () => void;
   onTogglePassword: () => void;
   onNavigateToRegister?: () => void;
   metrics: {
@@ -39,7 +42,9 @@ type LoginFormProps = {
 export function LoginForm({
   formik,
   errorMessage,
+  isGoogleSubmitting,
   showPassword,
+  onGoogleLogin,
   onTogglePassword,
   onNavigateToRegister,
   metrics,
@@ -226,7 +231,7 @@ export function LoginForm({
       <TouchableOpacity
         accessibilityRole="button"
         activeOpacity={0.88}
-        disabled={formik.isSubmitting}
+        disabled={formik.isSubmitting || isGoogleSubmitting}
         onPress={() => formik.handleSubmit()}
         style={{
           alignItems: 'center',
@@ -237,7 +242,7 @@ export function LoginForm({
           paddingHorizontal: 24,
           paddingVertical: 12,
           width: '100%',
-          opacity: formik.isSubmitting ? 0.6 : 1,
+          opacity: formik.isSubmitting || isGoogleSubmitting ? 0.6 : 1,
         }}>
         <HStack style={{ alignItems: 'center', justifyContent: 'center' }}>
           {formik.isSubmitting ? (
@@ -253,6 +258,31 @@ export function LoginForm({
           )}
         </HStack>
       </TouchableOpacity>
+
+      <HStack style={{ alignItems: 'center', justifyContent: 'center', marginTop: '1%' }}>
+        <Box style={{ backgroundColor: 'rgba(148, 163, 184, 0.2)', flex: 1, height: 1 }} />
+        <Text
+          style={[
+            {
+              color: palette.textSecondary,
+              fontSize: metrics.labelSize,
+              fontWeight: '700',
+              letterSpacing: metrics.labelSize * 0.08,
+              marginHorizontal: 12,
+            } as TextStyle,
+          ]}>
+          OR CONTINUE WITH
+        </Text>
+        <Box style={{ backgroundColor: 'rgba(148, 163, 184, 0.2)', flex: 1, height: 1 }} />
+      </HStack>
+
+      <GoogleAuthButton
+        bodySize={metrics.bodySize * 0.98}
+        buttonHeight={metrics.buttonHeight}
+        disabled={formik.isSubmitting || isGoogleSubmitting}
+        isSubmitting={isGoogleSubmitting}
+        onPress={onGoogleLogin}
+      />
 
       {/* Navigate to Register */}
       {onNavigateToRegister ? (
