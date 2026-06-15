@@ -4,20 +4,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Text } from '@/shared/ui';
 import { palette, radius, spacing } from '@/shared/design/tokens';
 import { BrandTrendIcon, BellIcon } from '@/app/navigation/NavigationIcons';
-import { useMarketStore } from '@/stores/market.store';
 import { useAppShellStore } from '@/stores/app-shell.store';
 
 type DashboardHeaderProps = {
+    badgeLabel?: string;
     onNotificationPress: () => void;
 };
 
-export function DashboardHeader({ onNotificationPress }: DashboardHeaderProps) {
+export function DashboardHeader({ badgeLabel, onNotificationPress }: DashboardHeaderProps) {
     const insets = useSafeAreaInsets();
-    const { marketStatus } = useMarketStore();
     const { unreadNotifications } = useAppShellStore();
-
-    const statusDot = marketStatus === 'OPEN' ? palette.positive : palette.warning;
-    const statusLabel = marketStatus === 'OPEN' ? 'Open' : 'Closed';
 
     return (
         <View style={[styles.shell, { paddingTop: insets.top + spacing.sm }]}>
@@ -28,10 +24,11 @@ export function DashboardHeader({ onNotificationPress }: DashboardHeaderProps) {
                 </View>
 
                 <View style={styles.actions}>
-                    <View style={styles.marketBadge}>
-                        <View style={[styles.statusDot, { backgroundColor: statusDot }]} />
-                        <Text style={[styles.marketLabel, { color: statusDot }]}>{statusLabel}</Text>
-                    </View>
+                    {badgeLabel ? (
+                        <View style={styles.marketBadge}>
+                            <Text style={styles.marketLabel}>{badgeLabel}</Text>
+                        </View>
+                    ) : null}
 
                     <Pressable
                         accessibilityHint="Open notification center"
@@ -87,17 +84,11 @@ const styles = StyleSheet.create({
         borderColor: palette.border,
         borderRadius: radius.pill,
         borderWidth: 1,
-        flexDirection: 'row',
-        gap: spacing.xs,
         paddingHorizontal: spacing.sm + 2,
         paddingVertical: spacing.xs + 2,
     },
-    statusDot: {
-        borderRadius: radius.pill,
-        height: 7,
-        width: 7,
-    },
     marketLabel: {
+        color: palette.primarySoft,
         fontSize: 11,
         fontWeight: '700',
         letterSpacing: 0.5,

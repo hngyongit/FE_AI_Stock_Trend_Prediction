@@ -12,11 +12,13 @@ import { AppBanner } from '@/shared/ui/feedback/AppBanner';
 import { LoadingSkeleton } from '@/shared/ui/feedback/LoadingSkeleton';
 import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useAppShellStore } from '@/stores/app-shell.store';
-import { useMarketStore } from '@/stores/market.store';
 
 type AppScreenProps = PropsWithChildren<{
   emptyState?: ReactNode;
   footer?: ReactNode;
+  isRefreshing?: boolean;
+  onRefresh?: () => Promise<void> | void;
+  showMarketBanner?: boolean;
 }>;
 
 function EmptyDashboardState() {
@@ -32,18 +34,23 @@ function EmptyDashboardState() {
   );
 }
 
-export function AppScreen({ children, emptyState, footer }: AppScreenProps) {
+export function AppScreen({
+  children,
+  emptyState,
+  footer,
+  isRefreshing,
+  onRefresh,
+  showMarketBanner = true,
+}: AppScreenProps) {
   const { height, width } = useWindowDimensions();
   const {
     isContentLoading,
     isOffline,
-    isRefreshing,
+    isRefreshing: shellRefreshing,
     isStale,
     refreshContent,
     warningMessage,
   } = useAppShellStore();
-  const { marketStatus } = useMarketStore();
-
   const responsiveStyles = useMemo(() => {
     const shortSide = Math.min(width, height);
 
@@ -81,22 +88,17 @@ export function AppScreen({ children, emptyState, footer }: AppScreenProps) {
     });
   }, [height, width]);
 
+  const effectiveRefreshing = isRefreshing ?? shellRefreshing;
+  const handleRefresh = onRefresh ?? refreshContent;
+
   const banners = [
-    marketStatus === 'CLOSED' ? (
+    showMarketBanner ? (
       <AppBanner
-        key="market-closed"
-        body="The exchange is currently closed. Cached layouts stay available while live modules pause."
-        title="Market Closed"
-        tone="warning"
+        key="market-banner"
+        body="Latest dashboard snapshot is available for quick review and refresh."
+        title="Market Snapshot"
       />
-    ) : (
-      <AppBanner
-        key="market-open"
-        body="Navigation is live and ready for intraday modules, watchlists, and alert surfaces."
-        title="Market Open"
-        tone="success"
-      />
-    ),
+    ) : null,
     isStale ? (
       <AppBanner
         key="stale"
@@ -120,8 +122,8 @@ export function AppScreen({ children, emptyState, footer }: AppScreenProps) {
         contentContainerStyle={responsiveStyles.content}
         refreshControl={
           <RefreshControl
-            onRefresh={() => { void refreshContent(); }}
-            refreshing={isRefreshing}
+            onRefresh={() => { void handleRefresh(); }}
+            refreshing={effectiveRefreshing}
             tintColor={palette.primary}
           />
         }
