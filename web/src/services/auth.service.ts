@@ -94,7 +94,7 @@ export async function register(credentials: RegisterCredentials): Promise<Regist
         const response = await apiClient.post<RegisterResponse>("/api/auth/register", credentials)
         payload = response.data
     } catch (error) {
-        throw new Error(getAxiosErrorMessage(error, "Registration failed"))
+        throw new Error(getAxiosErrorMessage(error, "Registration failed"), { cause: error })
     }
 
     if (payload.success === false) {
@@ -115,7 +115,7 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
         const response = await apiClient.post<LoginResponse>("/api/auth/login", credentials)
         payload = response.data
     } catch (error) {
-        throw new Error(getAxiosErrorMessage(error, "Login failed"))
+        throw new Error(getAxiosErrorMessage(error, "Login failed"), { cause: error })
     }
 
     if (payload.success === false) {
@@ -124,6 +124,27 @@ export async function login(credentials: LoginCredentials): Promise<LoginRespons
 
     if (!payload.data) {
         throw new Error("Login failed")
+    }
+
+    return payload
+}
+
+export async function exchangeOAuthCode(code: string): Promise<LoginResponse> {
+    let payload: LoginResponse
+
+    try {
+        const response = await apiClient.post<LoginResponse>("/api/auth/oauth/exchange", { code })
+        payload = response.data
+    } catch (error) {
+        throw new Error(getAxiosErrorMessage(error, "Google authentication failed"), { cause: error })
+    }
+
+    if (payload.success === false) {
+        throw new Error(payload.message || "Google authentication failed")
+    }
+
+    if (!payload.data) {
+        throw new Error("Google authentication failed")
     }
 
     return payload
@@ -140,7 +161,7 @@ export async function logout(accessToken: string): Promise<void> {
         })
         payload = response.data
     } catch (error) {
-        throw new Error(getAxiosErrorMessage(error, "Logout failed"))
+        throw new Error(getAxiosErrorMessage(error, "Logout failed"), { cause: error })
     }
 
     if (payload?.success === false) {
@@ -157,7 +178,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
         })
         payload = response.data
     } catch (error) {
-        throw new Error(getAxiosErrorMessage(error, "Unable to refresh access token"))
+        throw new Error(getAxiosErrorMessage(error, "Unable to refresh access token"), { cause: error })
     }
 
     const nextAccessToken = payload.data?.access_token

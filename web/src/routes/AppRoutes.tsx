@@ -5,6 +5,7 @@ import LoginPage from "@/pages/LoginPage/Login"
 import NothingHere from "@/pages/NothingHere"
 import Register from "@/pages/Register/Register"
 import ForgotPassword from "@/pages/ForgotPassword"
+import AuthCallbackPage from "@/pages/auth/AuthCallback"
 import { STAFF_ROUTES, USER_ROUTES, ADMIN_ROUTES } from "./layoutRoutes"
 import { renderProtectedLayoutRoute } from "./renderProtectedLayoutRoute"
 
@@ -15,6 +16,7 @@ export default function AppRoutes(): React.ReactElement {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
             <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             {USER_ROUTES.map((route) =>
                 renderProtectedLayoutRoute(route, {
