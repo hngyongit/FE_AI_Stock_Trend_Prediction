@@ -1,9 +1,9 @@
 import type { ReactElement } from "react"
 import { Navigate } from "react-router-dom"
 
-import AdminShell from "@/pages/admin"
-import AdminUserManagement from "@/pages/admin/AdminUserManagement/AdminUserManagement"
-import AdminStockList from "@/pages/admin/StockManagement/AdminStockList"
+import AdminShell from "@/pages/Admin"
+import AdminUserManagement from "@/pages/Admin/AdminUserManagement/AdminUserManagement"
+import AdminStockList from "@/pages/Admin/StockManagement/AdminStockList"
 import AlertsPage from "@/pages/AlertsPage"
 import ComparisonPage from "@/pages/ComparisonPage"
 import HistoricalAnalysisPage from "@/pages/HistoricalAnalysisPage"
