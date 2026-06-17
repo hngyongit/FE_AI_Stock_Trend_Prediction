@@ -1,7 +1,9 @@
 export type WatchlistStock = {
+    id?: string;
     symbol: string;
     company_name: string;
-    exchange_code: string;
+    market_id?: string;
+    market_code: string;
 };
 
 export type WatchlistLatestPrice = {
@@ -12,14 +14,27 @@ export type WatchlistLatestPrice = {
 };
 
 export type WatchlistItem = {
-    watchlist_id: string;
+    watchlist_id?: string;
     stock: WatchlistStock;
     latest_price: WatchlistLatestPrice | null;
-    created_at: string;
+    created_at?: string;
+};
+
+export type WatchlistOverlimitItem = {
+    stock_id: string;
+    stock_code: string;
+    stock_name: string;
+};
+
+export type WatchlistData = {
+    items: WatchlistItem[] | WatchlistOverlimitItem[];
+    limit: number;
+    currentCount: number;
+    overLimit: boolean;
 };
 
 export type WatchlistResponse = {
     success?: boolean;
     message?: string;
-    data: WatchlistItem[];
+    data: WatchlistData;
 };

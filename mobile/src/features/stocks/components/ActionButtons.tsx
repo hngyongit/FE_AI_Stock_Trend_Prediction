@@ -1,19 +1,35 @@
-import { BellPlus, PlusCircle } from 'lucide-react-native';
+import { BellPlus, MinusCircle, PlusCircle } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
 import { palette, radius, spacing } from '@/shared/design/tokens';
+import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
-export function ActionButtons() {
+type ActionButtonsProps = {
+  symbol: string;
+};
+
+export function ActionButtons({ symbol }: ActionButtonsProps) {
+  const { isWatched, toggle } = useToggleWatchlist(symbol);
+
   return (
     <View style={styles.row}>
       <Pressable accessibilityRole="button" style={styles.primaryButton}>
         <BellPlus color={palette.textPrimary} size={18} />
         <Text style={styles.primaryText}>Create Alert</Text>
       </Pressable>
-      <Pressable accessibilityRole="button" style={styles.secondaryButton}>
-        <PlusCircle color={palette.textPrimary} size={18} />
-        <Text style={styles.secondaryText}>Add to Watchlist</Text>
+      <Pressable
+        accessibilityRole="button"
+        onPress={toggle}
+        style={[styles.secondaryButton, isWatched && styles.secondaryButtonActive]}>
+        {isWatched ? (
+          <MinusCircle color={palette.textPrimary} size={18} />
+        ) : (
+          <PlusCircle color={palette.textPrimary} size={18} />
+        )}
+        <Text style={[styles.secondaryText, isWatched && styles.secondaryTextActive]}>
+          {isWatched ? 'Remove' : 'Add to Watchlist'}
+        </Text>
       </Pressable>
     </View>
   );
@@ -56,5 +72,12 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
     fontSize: 14,
     fontWeight: '800',
+  },
+  secondaryButtonActive: {
+    backgroundColor: palette.error + '20',
+    borderColor: palette.error,
+  },
+  secondaryTextActive: {
+    color: palette.error,
   },
 });

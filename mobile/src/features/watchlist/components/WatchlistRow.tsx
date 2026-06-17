@@ -13,7 +13,7 @@ export function WatchlistRow({ item, onPress }: WatchlistRowProps) {
         <StockListItem
             symbol={item.stock.symbol}
             companyName={item.stock.company_name}
-            exchangeCode={item.stock.exchange_code}
+            exchangeCode={item.stock.market_code}
             price={p?.close_price}
             priceChange={p?.price_change}
             priceChangePercent={p?.price_change_percent}

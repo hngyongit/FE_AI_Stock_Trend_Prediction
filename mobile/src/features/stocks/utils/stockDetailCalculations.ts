@@ -6,14 +6,24 @@ import type {
   TechnicalStats,
 } from '@/features/stocks/types';
 
-export const timeframeOptions: StockTimeframe[] = ['1D', '1W', '1M', '3M', '1Y'];
+export const timeframeOptions: StockTimeframe[] = ['7d', '1m', '3m', '6m', '1y', 'all'];
 
 export const rangeByTimeframe: Record<StockTimeframe, StockChartRange> = {
-  '1D': '7d',
-  '1W': '7d',
-  '1M': '1m',
-  '3M': '3m',
-  '1Y': '1y',
+  '7d': '7d',
+  '1m': '1m',
+  '3m': '3m',
+  '6m': '6m',
+  '1y': '1y',
+  'all': 'all',
+};
+
+export const timeframeLabels: Record<StockTimeframe, string> = {
+  '7d': '7D',
+  '1m': '1M',
+  '3m': '3M',
+  '6m': '6M',
+  '1y': '1Y',
+  'all': 'All',
 };
 
 export function calculatePriceStats(data: StockChartPoint[]): PriceStats {

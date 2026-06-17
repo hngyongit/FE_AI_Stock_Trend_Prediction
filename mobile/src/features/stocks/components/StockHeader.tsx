@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Text } from '@/shared/ui';
 import { palette, spacing } from '@/shared/design/tokens';
+import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
 type StockHeaderProps = {
   companyName: string;
@@ -11,6 +12,8 @@ type StockHeaderProps = {
 };
 
 export function StockHeader({ companyName, onBack, symbol }: StockHeaderProps) {
+  const { isWatched, toggle } = useToggleWatchlist(symbol);
+
   return (
     <View style={styles.header}>
       <Pressable accessibilityRole="button" onPress={onBack} style={styles.iconButton}>
@@ -23,8 +26,16 @@ export function StockHeader({ companyName, onBack, symbol }: StockHeaderProps) {
         </Text>
       </View>
       <View style={styles.actions}>
-        <Pressable accessibilityRole="button" style={styles.iconButton}>
-          <Star color={palette.textSecondary} size={20} />
+        <Pressable
+          accessibilityHint={isWatched ? 'Remove from watchlist' : 'Add to watchlist'}
+          accessibilityRole="button"
+          onPress={toggle}
+          style={styles.iconButton}>
+          <Star
+            color={isWatched ? palette.warning : palette.textSecondary}
+            fill={isWatched ? palette.warning : 'none'}
+            size={20}
+          />
         </Pressable>
         <Pressable accessibilityRole="button" style={styles.iconButton}>
           <Share2 color={palette.textSecondary} size={20} />

@@ -123,9 +123,7 @@ export function StockListItem({
                             )}
                             {rightMeta && <Text style={styles.rightMeta}>{rightMeta}</Text>}
                         </>
-                    ) : (
-                        <Text style={styles.noPrice}>—</Text>
-                    )}
+                    ) : null}
                 </View>
 
                 {/* Right accessory */}
@@ -236,11 +234,6 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '500',
         lineHeight: 14,
-    },
-    noPrice: {
-        color: palette.textMuted,
-        fontSize: 14,
-        fontWeight: '600',
     },
     rightAccessory: {
         marginLeft: spacing.sm,

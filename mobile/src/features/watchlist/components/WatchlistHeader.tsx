@@ -1,16 +1,15 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Box, Text } from '@/shared/ui';
+import { Text } from '@/shared/ui';
 import { palette, radius, spacing } from '@/shared/design/tokens';
 import { useMarketStore } from '@/stores/market.store';
 
 type WatchlistHeaderProps = {
     title: string;
-    onSortFilter: () => void;
     onAddStock: () => void;
 };
 
-export function WatchlistHeader({ title, onSortFilter, onAddStock }: WatchlistHeaderProps) {
+export function WatchlistHeader({ title, onAddStock }: WatchlistHeaderProps) {
     const { marketStatus } = useMarketStore();
     const statusColor = marketStatus === 'OPEN' ? palette.positive : palette.textMuted;
     const statusDot = marketStatus === 'OPEN' ? palette.positive : palette.warning;
@@ -26,26 +25,14 @@ export function WatchlistHeader({ title, onSortFilter, onAddStock }: WatchlistHe
                     </Text>
                 </View>
             </View>
-            <View style={styles.actions}>
-                <Pressable
-                    accessibilityHint="Sort or filter watchlist"
-                    accessibilityLabel="Sort filter"
-                    accessibilityRole="button"
-                    onPress={onSortFilter}
-                    style={({ pressed }) => [styles.iconButton, pressed && styles.iconButtonPressed]}>
-                    <Box style={styles.iconBox}>
-                        <Text style={styles.iconText}>⏷</Text>
-                    </Box>
-                </Pressable>
-                <Pressable
-                    accessibilityHint="Add stock to watchlist"
-                    accessibilityLabel="Add stock"
-                    accessibilityRole="button"
-                    onPress={onAddStock}
-                    style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}>
-                    <Text style={styles.addButtonText}>+ Add</Text>
-                </Pressable>
-            </View>
+            <Pressable
+                accessibilityHint="Add stock to watchlist"
+                accessibilityLabel="Add stock"
+                accessibilityRole="button"
+                onPress={onAddStock}
+                style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}>
+                <Text style={styles.addButtonText}>+ Add</Text>
+            </Pressable>
         </View>
     );
 }
@@ -83,30 +70,6 @@ const styles = StyleSheet.create({
         fontSize: 11,
         fontWeight: '600',
         letterSpacing: 0.3,
-    },
-    actions: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        gap: spacing.sm,
-        paddingTop: spacing.xs,
-    },
-    iconButton: {
-        height: 40,
-        width: 40,
-    },
-    iconBox: {
-        alignItems: 'center',
-        backgroundColor: palette.surface,
-        borderColor: palette.border,
-        borderRadius: 8,
-        borderWidth: 1,
-        height: 40,
-        justifyContent: 'center',
-        width: 40,
-    },
-    iconText: {
-        color: palette.textSecondary,
-        fontSize: 18,
     },
     addButton: {
         backgroundColor: palette.primary,

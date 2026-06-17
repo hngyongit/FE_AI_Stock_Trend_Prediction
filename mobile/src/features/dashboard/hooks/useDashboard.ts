@@ -67,19 +67,19 @@ export function useDashboard() {
 
   const summary = useMemo<DashboardSummary>(() => {
     const marketOverview = data?.market_overview ?? [];
-    const watchlistItems = data?.watchlist.items ?? [];
+    const watchlistItems = data?.watchlist?.items ?? [];
     const validatedWatchlistItems = watchlistItems.filter((item) => item.latest_price).length;
-    const watchlistTotal = data?.watchlist.total_stocks ?? 0;
+    const watchlistTotal = data?.watchlist?.total_stocks ?? 0;
     const primaryIndex = marketOverview[0] ?? null;
-    const leadersDate = data?.market_leaders.latest_trading_date ?? null;
+    const leadersDate = data?.market_leaders?.latest_trading_date ?? null;
 
     return {
-      gainersCount: data?.market_leaders.gainers.length ?? 0,
+      gainersCount: data?.market_leaders?.gainers.length ?? 0,
       latestTradingDateLabel: formatTradingDate(primaryIndex?.trading_date ?? null),
       leadersAsOfLabel: formatTradingDayId(leadersDate),
-      losersCount: data?.market_leaders.losers.length ?? 0,
-      topGainer: data?.market_leaders.gainers[0] ?? null,
-      topLoser: data?.market_leaders.losers[0] ?? null,
+      losersCount: data?.market_leaders?.losers.length ?? 0,
+      topGainer: data?.market_leaders?.gainers[0] ?? null,
+      topLoser: data?.market_leaders?.losers[0] ?? null,
       totalIndices: marketOverview.length,
       trackedStocks: watchlistTotal,
       validatedWatchlistItems,

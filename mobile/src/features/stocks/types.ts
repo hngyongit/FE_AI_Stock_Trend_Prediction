@@ -1,6 +1,6 @@
 export type StockChartRange = '7d' | '1m' | '3m' | '6m' | '1y' | 'all';
 
-export type StockTimeframe = '1D' | '1W' | '1M' | '3M' | '1Y';
+export type StockTimeframe = '7d' | '1m' | '3m' | '6m' | '1y' | 'all';
 
 export type StockChartPoint = {
   time: string;
