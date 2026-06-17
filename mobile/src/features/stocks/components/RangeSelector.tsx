@@ -3,7 +3,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { Text } from '@/shared/ui';
 import { palette, radius, spacing } from '@/shared/design/tokens';
 import type { StockTimeframe } from '@/features/stocks/types';
-import { timeframeOptions } from '@/features/stocks/utils/stockDetailCalculations';
+import {
+  timeframeOptions,
+  timeframeLabels,
+} from '@/features/stocks/utils/stockDetailCalculations';
 
 type RangeSelectorProps = {
   active: StockTimeframe;
@@ -23,7 +26,7 @@ export function RangeSelector({ active, onChange }: RangeSelectorProps) {
             onPress={() => onChange(timeframe)}
             style={[styles.option, isActive && styles.optionActive]}>
             <Text style={[styles.label, isActive && styles.labelActive]}>
-              {timeframe}
+              {timeframeLabels[timeframe]}
             </Text>
           </Pressable>
         );

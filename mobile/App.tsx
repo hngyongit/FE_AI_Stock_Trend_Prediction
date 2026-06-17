@@ -6,6 +6,7 @@ if (typeof (globalThis as any).Buffer === 'undefined') {
 }
 
 import { DarkTheme, NavigationContainer } from '@react-navigation/native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
@@ -13,6 +14,8 @@ import { ThemeProvider } from '@/shared/ui/primitives';
 import { RootNavigator } from '@/app/navigation/RootNavigator';
 import { palette } from '@/shared/design/tokens';
 import '@/global.css';
+
+const queryClient = new QueryClient();
 
 const navigationTheme = {
   ...DarkTheme,
@@ -28,13 +31,15 @@ const navigationTheme = {
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ backgroundColor: palette.background, flex: 1 }}>
-      <ThemeProvider mode="dark">
-        <NavigationContainer theme={navigationTheme}>
-          <StatusBar style="light" />
-          <RootNavigator />
-        </NavigationContainer>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <QueryClientProvider client={queryClient}>
+      <GestureHandlerRootView style={{ backgroundColor: palette.background, flex: 1 }}>
+        <ThemeProvider mode="dark">
+          <NavigationContainer theme={navigationTheme}>
+            <StatusBar style="light" />
+            <RootNavigator />
+          </NavigationContainer>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }

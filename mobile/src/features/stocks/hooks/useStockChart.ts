@@ -12,7 +12,7 @@ import {
 } from '@/features/stocks/utils/stockDetailCalculations';
 
 export function useStockChart(symbol: string) {
-  const [timeframe, setTimeframe] = useState<StockTimeframe>('1M');
+  const [timeframe, setTimeframe] = useState<StockTimeframe>('1m');
   const [data, setData] = useState<StockChartPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

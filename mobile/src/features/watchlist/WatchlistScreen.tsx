@@ -67,7 +67,7 @@ export function WatchlistScreen() {
     } else if (activeChip === 'losers') {
       result = result.filter((i) => (i.latest_price?.price_change_percent ?? 0) < 0);
     } else if (activeChip === 'hose') {
-      result = result.filter((i) => i.stock.exchange_code === 'HOSE');
+      result = result.filter((i) => i.stock.market_code === 'HOSE');
     }
 
     return result;
@@ -97,14 +97,13 @@ export function WatchlistScreen() {
       <>
         <WatchlistHeader
           title="My Watchlist"
-          onSortFilter={() => { }}
-          onAddStock={() => { }}
+          onAddStock={() => navigation.navigate('Search')}
         />
         <WatchlistSearchBar value={searchQuery} onChangeText={setSearchQuery} />
         <WatchlistFilterChips activeChip={activeChip} onChipChange={setActiveChip} />
       </>
     ),
-    [searchQuery, activeChip],
+    [searchQuery, activeChip, navigation],
   );
 
   if (isActuallyLoading) {
@@ -133,7 +132,7 @@ export function WatchlistScreen() {
         contentContainerStyle={{ paddingBottom: spacing.lg, paddingHorizontal: spacing.md, paddingTop: insets.top }}
         data={filteredItems}
         ItemSeparatorComponent={ListSeparator}
-        keyExtractor={(item) => item.watchlist_id}
+        keyExtractor={(item) => item.watchlist_id ?? item.stock.symbol}
         ListEmptyComponent={<EmptyWatchlistState />}
         ListHeaderComponent={renderListHeader}
         refreshControl={

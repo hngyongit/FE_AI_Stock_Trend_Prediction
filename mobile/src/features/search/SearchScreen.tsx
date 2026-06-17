@@ -3,11 +3,13 @@ import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Star } from 'lucide-react-native';
 
 import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
 import {
@@ -21,6 +23,7 @@ import { useSearchStocks } from '@/features/search/hooks/useSearchStocks';
 import type { StockListItem as SearchStockItem } from '@/features/stocks/types';
 import { palette, spacing } from '@/shared/design/tokens';
 import { StockListItem } from '@/shared/ui';
+import { useToggleWatchlist } from '@/features/stocks/hooks/useToggleWatchlist';
 
 function SearchResultSeparator() {
   return <View style={styles.separator} />;
@@ -37,6 +40,39 @@ function dedupeBySymbol(items: SearchStockItem[]) {
     seen.add(item.symbol);
     return true;
   });
+}
+
+function SearchItem({ item, onPress }: { item: SearchStockItem; onPress: () => void }) {
+  const { isWatched, toggle } = useToggleWatchlist(item.symbol);
+
+  const handleToggleWatchlist = (e: any) => {
+    e.stopPropagation();
+    toggle();
+  };
+
+  return (
+    <StockListItem
+      companyName={item.companyName ?? `${item.symbol} CORPORATION`}
+      exchangeCode={item.market}
+      onPress={onPress}
+      price={item.latestClosePrice}
+      priceChange={item.change}
+      priceChangePercent={item.changePercent}
+      rightMeta={item.sector ?? item.industry}
+      rightAccessory={
+        <Pressable onPress={handleToggleWatchlist} style={styles.addButton}>
+          <Star
+            color={isWatched ? palette.warning : palette.textSecondary}
+            fill={isWatched ? palette.warning : 'none'}
+            size={18}
+          />
+        </Pressable>
+      }
+      subtitle={item.companyName ?? item.sector ?? 'Stock instrument'}
+      symbol={item.symbol}
+      volume={item.volume}
+    />
+  );
 }
 
 export function SearchScreen() {
@@ -121,20 +157,17 @@ export function SearchScreen() {
     navigation.navigate('StockDetail', { symbol: normalized });
   }
 
-  const renderItem = ({ item }: { item: SearchStockItem }) => (
-    <StockListItem
-      companyName={item.companyName ?? `${item.symbol} CORPORATION`}
-      exchangeCode={item.market}
-      onPress={() => openSymbol(item.symbol)}
-      price={item.latestClosePrice}
-      priceChange={item.change}
-      priceChangePercent={item.changePercent}
-      rightMeta={item.sector ?? item.industry}
-      subtitle={item.companyName ?? item.sector ?? 'Stock instrument'}
-      symbol={item.symbol}
-      volume={item.volume}
-    />
-  );
+  const handleItemPress = (symbol: string) => {
+    const rawValue = symbol.trim();
+    if (!rawValue) {
+      return;
+    }
+    const normalized = rawValue.toUpperCase();
+    pushRecentSearch(normalized);
+    setShowDirectory(false);
+    setQuery(normalized);
+    navigation.navigate('StockDetail', { symbol: normalized });
+  };
 
   const header = (
     <SearchHeaderPanel
@@ -186,7 +219,9 @@ export function SearchScreen() {
             tintColor={palette.primary}
           />
         }
-        renderItem={renderItem}
+        renderItem={({ item }) => (
+          <SearchItem item={item} onPress={() => handleItemPress(item.symbol)} />
+        )}
         showsVerticalScrollIndicator={false}
       />
       {isLoading ? (
@@ -222,5 +257,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: spacing.xl + 32,
+  },
+  addButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 4,
   },
 });

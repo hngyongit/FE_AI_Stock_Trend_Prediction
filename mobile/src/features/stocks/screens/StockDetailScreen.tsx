@@ -59,7 +59,7 @@ export function StockDetailScreen({
           onRetry={stockChart.refresh}
         />
         <TechnicalSummary stats={stockChart.technicalStats} />
-        <ActionButtons />
+        <ActionButtons symbol={symbol} />
         <PeerComparison />
         <DataQualityFooter
           fetchedAt={stockChart.fetchedAt}
