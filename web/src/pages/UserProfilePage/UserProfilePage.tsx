@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { RefreshCw, User, Mail, Shield, Calendar, CheckCircle, XCircle, Loader2, Save, Lock, AlertTriangle, Eye, EyeOff } from "lucide-react"
+import { RefreshCw, User, Mail, Shield, Calendar, CheckCircle, XCircle, Loader2, Save, Lock, AlertTriangle, Eye, EyeOff, CreditCard, History } from "lucide-react"
 import { useFormik } from "formik"
 import { object, string, ref } from "yup"
 
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useAuth } from "@/providers/AuthProvider"
-import { getMyProfile, updateMyProfile, changeMyPassword, type UserProfile } from "@/services/users.service"
+import { getMyProfile, updateMyProfile, changeMyPassword, getMyTransactions, type UserProfile, type MyTransaction } from "@/services/users.service"
 import {
     Dialog,
     DialogContent,
@@ -106,6 +106,14 @@ export default function UserProfilePage() {
     // Password submission state
     const [pwSubError, setPwSubError] = useState<string | null>(null)
 
+    // Tab state
+    const [activeTab, setActiveTab] = useState<"profile" | "transactions">("profile")
+
+    // Transactions state
+    const [transactions, setTransactions] = useState<MyTransaction[]>([])
+    const [txLoading, setTxLoading] = useState(false)
+    const [txError, setTxError] = useState<string | null>(null)
+
     /* ── Load profile ────────────────────────────────── */
 
     useEffect(() => {
@@ -141,6 +149,28 @@ export default function UserProfilePage() {
             isActive = false
         }
     }, [auth.accessToken, reloadTick])
+
+    /* ── Load Transactions ───────────────────────────── */
+
+    const loadTransactions = async () => {
+        if (!auth.accessToken) return
+        setTxLoading(true)
+        setTxError(null)
+        try {
+            const data = await getMyTransactions(1, 20)
+            setTransactions(data.items)
+        } catch (err) {
+            setTxError(err instanceof Error ? err.message : "Unable to load transactions")
+        } finally {
+            setTxLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        if (activeTab === "transactions" && transactions.length === 0 && !txLoading) {
+            loadTransactions()
+        }
+    }, [activeTab])
 
     /* ── Edit Profile Formik ─────────────────────────── */
 
@@ -259,66 +289,154 @@ export default function UserProfilePage() {
                 </Button>
             </header>
 
-            {/* Profile Avatar + Identity Card */}
-            <div className="mt-5 rounded-lg border border-border bg-[#111827] p-5">
-                <div className="flex items-start gap-4">
-                    <Avatar size="lg" className="size-14">
-                        <AvatarFallback className="bg-[#1E293B] text-lg font-semibold text-[#F8FAFC]">
-                            {getInitials(profile?.full_name)}
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                        <h2 className="text-base font-semibold text-[#F8FAFC]">
-                            {textOrPlaceholder(profile?.full_name)}
-                        </h2>
-                        <p className="mt-0.5 text-sm text-[#94A3B8]">
-                            {textOrPlaceholder(profile?.email)}
-                        </p>
-                        <div className="mt-2 flex items-center gap-2">
-                            <Badge variant={getRoleBadgeVariant(profile?.role)}>
-                                {textOrPlaceholder(profile?.role)}
-                            </Badge>
-                            <span className="inline-flex items-center gap-1 text-xs text-[#94A3B8]">
-                                {getStatusIcon(profile?.status)}
-                                {textOrPlaceholder(profile?.status)}
-                            </span>
+            {/* Tabs */}
+            <div className="mb-4 flex gap-1 rounded-lg bg-[#111827] p-1">
+                <button
+                    type="button"
+                    onClick={() => setActiveTab("profile")}
+                    className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
+                        activeTab === "profile"
+                            ? "bg-[#3b82f6] text-white"
+                            : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                    }`}
+                >
+                    <User className="mr-1.5 size-3.5 inline" />
+                    Personal Info
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setActiveTab("transactions")}
+                    className={`flex-1 rounded-md px-3 py-2 text-sm font-medium transition ${
+                        activeTab === "transactions"
+                            ? "bg-[#3b82f6] text-white"
+                            : "text-[#94A3B8] hover:text-[#F8FAFC]"
+                    }`}
+                >
+                    <CreditCard className="mr-1.5 size-3.5 inline" />
+                    Payment History
+                </button>
+            </div>
+
+            {/* Profile Avatar + Identity Card (only show in profile tab) */}
+            {activeTab === "profile" && (
+                <div className="mt-5 rounded-lg border border-border bg-[#111827] p-5">
+                    <div className="flex items-start gap-4">
+                        <Avatar size="lg" className="size-14">
+                            <AvatarFallback className="bg-[#1E293B] text-lg font-semibold text-[#F8FAFC]">
+                                {getInitials(profile?.full_name)}
+                            </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-base font-semibold text-[#F8FAFC]">
+                                {textOrPlaceholder(profile?.full_name)}
+                            </h2>
+                            <p className="mt-0.5 text-sm text-[#94A3B8]">
+                                {textOrPlaceholder(profile?.email)}
+                            </p>
+                            <div className="mt-2 flex items-center gap-2">
+                                <Badge variant={getRoleBadgeVariant(profile?.role)}>
+                                    {textOrPlaceholder(profile?.role)}
+                                </Badge>
+                                <span className="inline-flex items-center gap-1 text-xs text-[#94A3B8]">
+                                    {getStatusIcon(profile?.status)}
+                                    {textOrPlaceholder(profile?.status)}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Profile Details */}
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {rows.map((row) => {
-                    const Icon = row.icon
-                    return (
-                        <div
-                            key={row.label}
-                            className="rounded-lg border border-border bg-[#111827] px-4 py-3 transition hover:border-[#334155]"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Icon className="size-3.5 text-[#64748B]" />
-                                <span className="text-[0.72rem] font-medium text-[#94A3B8] uppercase tracking-wider">
-                                    {row.label}
-                                </span>
-                            </div>
-                            <div className="mt-1.5 text-sm text-[#F8FAFC]">{row.value}</div>
+            {/* Transactions Tab Content */}
+            {activeTab === "transactions" && (
+                <div className="mt-4 rounded-lg border border-border bg-[#111827]">
+                    <div className="flex items-center justify-between border-b border-border px-4 py-3">
+                        <h2 className="text-base font-semibold text-[#F8FAFC]">Payment History</h2>
+                        <Button type="button" variant="outline" size="sm" onClick={loadTransactions} disabled={txLoading}>
+                            <RefreshCw className="mr-1.5 size-3.5" />
+                            Refresh
+                        </Button>
+                    </div>
+                    {txLoading ? (
+                        <div className="flex items-center justify-center p-12">
+                            <div className="size-5 animate-spin rounded-full border-2 border-[#3b82f6] border-t-transparent" />
                         </div>
-                    )
-                })}
-            </div>
+                    ) : txError ? (
+                        <div className="flex items-center justify-center gap-2 p-6 text-red-400">
+                            <AlertTriangle className="size-4" />
+                            <span>{txError}</span>
+                        </div>
+                    ) : transactions.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 p-12 text-[#94A3B8]">
+                            <History className="size-8" />
+                            <p>No payment history found.</p>
+                        </div>
+                    ) : (
+                        <div className="divide-y divide-border">
+                            {transactions.map((tx) => (
+                                <div key={tx.id} className="flex items-center justify-between px-4 py-3">
+                                    <div>
+                                        <div className="text-sm font-medium text-[#F8FAFC]">
+                                            {tx.type === "PAYOS_PAYMENT" ? "Payment" : tx.type.replace("ADMIN_", "")}
+                                        </div>
+                                        <div className="text-xs text-[#94A3B8]">
+                                            {new Date(tx.created_at).toLocaleString()}
+                                        </div>
+                                        {tx.notes && (
+                                            <div className="text-xs text-[#64748B] mt-1">{tx.notes}</div>
+                                        )}
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-sm font-semibold text-[#F8FAFC]">
+                                            {tx.amount > 0 ? `${tx.amount.toLocaleString()} VND` : "—"}
+                                        </div>
+                                        <div className={`text-xs ${tx.status === "PAID" ? "text-emerald-400" : "text-slate-400"}`}>
+                                            {tx.status}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
-            {/* Actions */}
-            <div className="mt-6 flex flex-wrap gap-3">
-                <Button onClick={handleEditProfileOpen}>
-                    <User className="mr-1.5 size-3.5" />
-                    Edit Profile
-                </Button>
-                <Button variant="outline" onClick={handleChangePasswordOpen}>
-                    <Lock className="mr-1.5 size-3.5" />
-                    Change Password
-                </Button>
-            </div>
+            {/* Profile Details (only show in profile tab) */}
+            {activeTab === "profile" && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {rows.map((row) => {
+                        const Icon = row.icon
+                        return (
+                            <div
+                                key={row.label}
+                                className="rounded-lg border border-border bg-[#111827] px-4 py-3 transition hover:border-[#334155]"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Icon className="size-3.5 text-[#64748B]" />
+                                    <span className="text-[0.72rem] font-medium text-[#94A3B8] uppercase tracking-wider">
+                                        {row.label}
+                                    </span>
+                                </div>
+                                <div className="mt-1.5 text-sm text-[#F8FAFC]">{row.value}</div>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
+
+            {/* Actions (only show in profile tab) */}
+            {activeTab === "profile" && (
+                <div className="mt-6 flex flex-wrap gap-3">
+                    <Button onClick={handleEditProfileOpen}>
+                        <User className="mr-1.5 size-3.5" />
+                        Edit Profile
+                    </Button>
+                    <Button variant="outline" onClick={handleChangePasswordOpen}>
+                        <Lock className="mr-1.5 size-3.5" />
+                        Change Password
+                    </Button>
+                </div>
+            )}
 
             {/* ─── Edit Profile Dialog ─── */}
             <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>

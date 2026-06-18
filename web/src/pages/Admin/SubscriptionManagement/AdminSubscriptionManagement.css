@@ -1,0 +1,216 @@
+/* Admin Subscription Management — inherits ams BEM naming from AdminUserManagement.css */
+
+/* ── Summary cards row ── */
+.ams__summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ams__summary-card {
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(15, 23, 42, 0.6)), #111827;
+}
+
+.ams__summary-label {
+    display: block;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.ams__summary-value {
+    display: block;
+    margin-top: 4px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #f8fafc;
+}
+
+.ams__summary-sub {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+}
+
+/* ── Table plan badge ── */
+.plan-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.plan-badge--pro {
+    background: rgba(250, 204, 21, 0.12);
+    color: #facc15;
+    border: 1px solid rgba(250, 204, 21, 0.25);
+}
+
+.plan-badge--free {
+    background: rgba(148, 163, 184, 0.1);
+    color: #94a3b8;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* ── Subscription status badge ── */
+.sub-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.sub-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.sub-status--active {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+}
+
+.sub-status--active::before {
+    background: #4ade80;
+    box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.sub-status--expired {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+}
+
+.sub-status--expired::before {
+    background: #f87171;
+}
+
+.sub-status--cancelled {
+    background: rgba(251, 146, 60, 0.1);
+    color: #fb923c;
+}
+
+.sub-status--cancelled::before {
+    background: #fb923c;
+}
+
+.sub-status--none {
+    background: rgba(148, 163, 184, 0.08);
+    color: #64748b;
+}
+
+.sub-status--none::before {
+    background: #64748b;
+}
+
+/* ── Action buttons row ── */
+.ams__row-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+/* ── Renew / Grant dialog ── */
+.sub-modal__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 8px;
+}
+
+.sub-modal__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sub-modal__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.sub-modal__value {
+    font-size: 0.88rem;
+    color: var(--foreground);
+}
+
+.sub-modal__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.sub-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.sub-modal__input {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #1e293b;
+    color: var(--foreground);
+    font-size: 0.88rem;
+}
+
+.sub-modal__textarea {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #1e293b;
+    color: var(--foreground);
+    font-size: 0.88rem;
+    resize: vertical;
+    min-height: 72px;
+    font-family: inherit;
+}
+
+/* ── Expiry cell ── */
+.ams__expiry-cell {
+    font-size: 0.8rem;
+    color: var(--foreground);
+    white-space: nowrap;
+}
+
+.ams__expiry-cell--overdue {
+    color: #f87171;
+    font-weight: 600;
+}
+
+.ams__expiry-cell--soon {
+    color: #facc15;
+}
+
+/* ── Empty state ── */
+.ams__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 48px 16px;
+    color: var(--muted-foreground);
+    font-size: 0.85rem;
+}

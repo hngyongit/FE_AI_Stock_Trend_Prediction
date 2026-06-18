@@ -1,9 +1,12 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react"
 import {
   AlertTriangle,
+  BarChart3,
+  CreditCard,
   LayoutDashboard,
   LockKeyhole,
   Logs,
+  Receipt,
   Settings,
   ShieldCheck,
   TrendingUp,
@@ -51,6 +54,14 @@ const NAV_SECTIONS: SidebarSectionData[] = [
       { label: "Staff Management", to: "/admin/staff", icon: UserCog },
       { label: "Stock Management", to: "/admin/stocks", icon: TrendingUp },
       { label: "Market Coverage", to: "/admin/market-coverage", icon: ShieldCheck },
+    ],
+  },
+  {
+    title: "SUBSCRIPTIONS",
+    items: [
+      { label: "All Subscriptions", to: "/admin/subscriptions", icon: CreditCard, end: true },
+      { label: "Subscription Stats", to: "/admin/subscriptions/stats", icon: BarChart3 },
+      { label: "Transaction Log", to: "/admin/subscriptions/transactions", icon: Receipt },
     ],
   },
   {
