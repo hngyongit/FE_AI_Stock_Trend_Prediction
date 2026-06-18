@@ -96,6 +96,10 @@ type StockListResponse = {
     }
     source?: string
     lastUpdated?: string
+    page?: number
+    limit?: number
+    total_items?: number
+    total_pages?: number
 }
 
 const DATE_KEYS = ["time", "date", "datetime", "timestamp", "tradingDate", "trading_date"]
@@ -201,7 +205,16 @@ function stockListMetaFromPayload(payload: StockListResponse | unknown): StockLi
         : {}
 
     return {
-        total: response.meta?.total ?? response.total ?? response.pagination?.total ?? data.meta?.total ?? data.total ?? data.pagination?.total,
+        total: response.meta?.total
+            ?? response.total
+            ?? response.total_items
+            ?? response.pagination?.total
+            ?? (response.pagination as { total_items?: number } | undefined)?.total_items
+            ?? data.meta?.total
+            ?? data.total
+            ?? data.total_items
+            ?? data.pagination?.total
+            ?? (data.pagination as { total_items?: number } | undefined)?.total_items,
         lastUpdated: response.meta?.lastUpdated ?? response.lastUpdated ?? data.meta?.lastUpdated ?? data.lastUpdated,
         source: response.meta?.source ?? response.source ?? data.meta?.source ?? data.source,
     }
@@ -248,7 +261,7 @@ function mapStockItem(item: unknown): StockItem | null {
     return {
         symbol,
         companyName: toText(firstValue(record, ["companyName", "company_name", "name", "fullName", "full_name"])),
-        market: toText(firstValue(record, ["market", "exchange"])),
+        market: toText(firstValue(record, ["market", "exchange", "market_code", "exchange_code"])),
         industry: toText(firstValue(record, ["industry", "industryName", "industry_name"])),
         sector: toText(firstValue(record, ["sector", "sectorName", "sector_name"])),
         status: toText(firstValue(record, ["status", "stockStatus", "stock_status"])),
