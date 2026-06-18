@@ -28,6 +28,7 @@ import SubscriptionStats from "@/pages/Admin/SubscriptionStats/SubscriptionStats
 import TransactionLog from "@/pages/Admin/TransactionLog/TransactionLog"
 import StaffSubscriptionManagement from "@/pages/Staff/StaffSubscriptionManagement/StaffSubscriptionManagement"
 import StaffSubscriptionDetail from "@/pages/Staff/StaffSubscriptionManagement/StaffSubscriptionDetail"
+import UpgradePage from "@/pages/UpgradePage/UpgradePage"
 
 export type LayoutRoute = {
     path: string
@@ -46,6 +47,7 @@ export const USER_ROUTES: LayoutRoute[] = [
     { path: "/historical-analysis", element: <HistoricalAnalysisPage /> },
     { path: "/comparison", element: <ComparisonPage /> },
     { path: "/settings", element: <SettingsPage /> },
+    { path: "/upgrade", element: <UpgradePage /> },
 ]
 
 export const STAFF_ROUTES: LayoutRoute[] = [

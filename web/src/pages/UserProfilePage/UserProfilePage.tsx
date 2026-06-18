@@ -1,7 +1,26 @@
 import { useEffect, useMemo, useState } from "react"
-import { RefreshCw, User, Mail, Shield, Calendar, CheckCircle, XCircle, Loader2, Save, Lock, AlertTriangle, Eye, EyeOff, CreditCard, History } from "lucide-react"
+import {
+    RefreshCw,
+    User,
+    Mail,
+    Shield,
+    Calendar,
+    CheckCircle,
+    XCircle,
+    Loader2,
+    Save,
+    Lock,
+    AlertTriangle,
+    Eye,
+    EyeOff,
+    CreditCard,
+    History,
+    Crown,
+    Sparkles,
+} from "lucide-react"
 import { useFormik } from "formik"
 import { object, string, ref } from "yup"
+import { Link } from "react-router-dom"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -59,6 +78,27 @@ function getStatusIcon(status?: string) {
     ) : (
         <XCircle className="size-3.5 text-[#EF4444]" />
     )
+}
+
+function getUserPlan(profile?: UserProfile | null) {
+    const rawPlan =
+        profile?.plan ||
+        profile?.subscription?.plan ||
+        profile?.subscription?.type ||
+        "FREE"
+
+    return String(rawPlan).toUpperCase()
+}
+
+function getPlanBadgeClass(plan?: string) {
+    switch (plan?.toUpperCase()) {
+        case "PRO":
+            return "border-blue-500/30 bg-blue-500/10 text-blue-300"
+        case "PREMIUM":
+            return "border-purple-500/30 bg-purple-500/10 text-purple-300"
+        default:
+            return "border-slate-500/30 bg-slate-500/10 text-slate-300"
+    }
 }
 
 /* ── Yup schemas ────────────────────────────────────── */
@@ -226,14 +266,18 @@ export default function UserProfilePage() {
 
     /* ── Derived data ────────────────────────────────── */
 
+    const userPlan = getUserPlan(profile)
+    const isFreePlan = userPlan === "FREE"
+
     const rows = useMemo(
         () => [
             { label: "Full Name", value: textOrPlaceholder(profile?.full_name), icon: User },
             { label: "Email", value: textOrPlaceholder(profile?.email), icon: Mail },
             { label: "Role", value: textOrPlaceholder(profile?.role), icon: Shield },
+            { label: "Current Plan", value: userPlan, icon: Crown },
             { label: "Created At", value: formatDate(profile?.created_at), icon: Calendar },
         ],
-        [profile]
+        [profile, userPlan]
     )
 
     const handleEditProfileOpen = () => {
@@ -417,7 +461,19 @@ export default function UserProfilePage() {
                                         {row.label}
                                     </span>
                                 </div>
-                                <div className="mt-1.5 text-sm text-[#F8FAFC]">{row.value}</div>
+                                <div className="mt-1.5 text-sm text-[#F8FAFC]">
+                                    {row.label === "Current Plan" ? (
+                                        <Link
+                                            to="/upgrade"
+                                            className="inline-flex items-center gap-1 font-medium text-blue-300 hover:text-blue-200"
+                                        >
+                                            {row.value}
+                                            <Sparkles className="size-3.5" />
+                                        </Link>
+                                    ) : (
+                                        row.value
+                                    )}
+                                </div>
                             </div>
                         )
                     })}
@@ -434,6 +490,12 @@ export default function UserProfilePage() {
                     <Button variant="outline" onClick={handleChangePasswordOpen}>
                         <Lock className="mr-1.5 size-3.5" />
                         Change Password
+                    </Button>
+                    <Button asChild variant={isFreePlan ? "default" : "outline"}>
+                        <Link to="/upgrade">
+                            <Crown className="mr-1.5 size-3.5" />
+                            {isFreePlan ? "Upgrade Plan" : "View Plan"}
+                        </Link>
                     </Button>
                 </div>
             )}

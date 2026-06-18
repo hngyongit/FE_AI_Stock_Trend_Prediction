@@ -7,6 +7,16 @@ export type UserProfile = {
     role?: string
     status?: string
     created_at?: string
+
+    plan?: string
+    subscription?: {
+        plan?: string
+        type?: string
+        status?: string
+        startDate?: string
+        endDate?: string
+        expiredAt?: string
+    }
 }
 
 type MeResponse = {
