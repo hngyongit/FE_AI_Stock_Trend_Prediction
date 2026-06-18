@@ -36,31 +36,25 @@ export type TrimWatchlistResult = {
     deleted?: number
 }
 
-function mapWatchlistItem(raw: any): StockItem | null {
-    if (!raw || typeof raw !== "object") return null
+type WatchlistApiResponse = {
+    success?: boolean
+    message?: string
+    data?: WatchlistRawItem[] | {
+        items?: WatchlistRawItem[]
+        watchlist?: WatchlistRawItem[]
+        overLimit?: boolean
+        limit?: number
+    }
+    overLimit?: boolean
+    limit?: number
+}
 
-    /**
-     * Case 1:
-     * Normal response:
-     * {
-     *   stock: { symbol, company_name, market_code },
-     *   latest_price: {...}
-     * }
-     */
+function mapWatchlistItem(raw: WatchlistRawItem): StockItem | null {
+    if (!raw) return null
     const stock = raw.stock ?? {}
     const latestPrice = raw.latest_price ?? {}
 
-    /**
-     * Case 2:
-     * Over limit response:
-     * {
-     *   stock_id,
-     *   stock_code,
-     *   stock_name
-     * }
-     */
     const symbol = stock.symbol?.trim() || raw.stock_code?.trim()
-
     if (!symbol) return null
 
     return {
@@ -74,35 +68,25 @@ function mapWatchlistItem(raw: any): StockItem | null {
     }
 }
 
-function getRawListFromPayload(payload: any): WatchlistRawItem[] {
-    const data = payload?.data
-
-    if (Array.isArray(data)) {
-        return data
-    }
-
-    if (Array.isArray(data?.items)) {
-        return data.items
-    }
-
-    if (Array.isArray(data?.watchlist)) {
-        return data.watchlist
-    }
-
+function getRawListFromPayload(payload: WatchlistApiResponse): WatchlistRawItem[] {
+    const data = payload.data
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.items)) return data.items
+    if (Array.isArray(data?.watchlist)) return data.watchlist
     return []
 }
 
 export async function getWatchlistData(): Promise<WatchlistData> {
-    const response = await authenticatedRequest({
+    const response = await authenticatedRequest<WatchlistApiResponse>({
         url: "/api/watchlists",
         method: "GET",
     })
-
-    const payload = response.data as any
+    const payload = response.data
     const rawList = getRawListFromPayload(payload)
-
-    const overLimit = Boolean(payload?.data?.overLimit ?? payload?.overLimit ?? false)
-    const limit = Number(payload?.data?.limit ?? payload?.limit ?? 5)
+    
+    const dataObj = !Array.isArray(payload.data) ? payload.data : {}
+    const overLimit = Boolean(dataObj?.overLimit ?? payload.overLimit ?? false)
+    const limit = Number(dataObj?.limit ?? payload.limit ?? 5)
 
     return {
         items: rawList.map(mapWatchlistItem).filter((item): item is StockItem => item !== null),
@@ -118,27 +102,24 @@ export async function getWatchlist(): Promise<StockItem[]> {
 }
 
 export async function addToWatchlist(symbol: string): Promise<AddToWatchlistResult> {
-    const response = await authenticatedRequest({
+    const response = await authenticatedRequest<{ success: boolean; message: string; data: AddToWatchlistResult }>({
         url: "/api/watchlists",
         method: "POST",
         data: { symbol },
     })
-
-    const payload = response.data as any
+    const payload = response.data
 
     if (response.status === 400) {
         throw new Error(payload?.message || "Watchlist limit exceeded or stock already exists")
     }
-
     if (response.status === 404) {
         throw new Error(payload?.message || "Stock symbol not found")
     }
-
-    if (!payload?.success) {
+    if (!payload?.success || !payload.data) {
         throw new Error(payload?.message || "Failed to add stock to watchlist")
     }
 
-    return payload.data as AddToWatchlistResult
+    return payload.data
 }
 
 export async function removeFromWatchlist(symbol: string): Promise<void> {
@@ -149,19 +130,15 @@ export async function removeFromWatchlist(symbol: string): Promise<void> {
 }
 
 export async function trimWatchlist(keepStockIds: string[]): Promise<TrimWatchlistResult> {
-    const response = await authenticatedRequest({
+    const response = await authenticatedRequest<{ success: boolean; message: string; data: TrimWatchlistResult }>({
         url: "/api/watchlists/trim",
         method: "POST",
-        data: {
-            keepStockIds,
-        },
+        data: { keepStockIds },
     })
-
-    const payload = response.data as any
-
+    
+    const payload = response.data
     if (!payload?.success) {
         throw new Error(payload?.message || "Failed to trim watchlist")
     }
-
-    return payload.data as TrimWatchlistResult
+    return payload.data || {}
 }
