@@ -155,6 +155,10 @@
     background: rgba(30, 41, 59, 0.45);
 }
 
+.stock-list__table-row {
+    cursor: pointer;
+}
+
 .stock-list__symbol-cell {
     font-weight: 700;
     color: var(--foreground) !important;

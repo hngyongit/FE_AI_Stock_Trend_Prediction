@@ -317,6 +317,10 @@ export default function StockListPage() {
         setTablePage(1)
     }
 
+    const handleNavigateToStock = (symbol: string) => {
+        navigate(`/stocks/${encodeURIComponent(symbol)}`)
+    }
+
     return (
         <div className="stock-list">
             <Breadcrumb items={["Home", "Stock List"]} />
@@ -461,7 +465,11 @@ export default function StockListPage() {
                                     {paginatedItems.map((item) => {
                                         const industryLabel = item.industry || item.sector
                                         return (
-                                            <tr key={item.symbol}>
+                                            <tr
+                                                key={item.symbol}
+                                                className="stock-list__table-row"
+                                                onClick={() => handleNavigateToStock(item.symbol)}
+                                            >
                                                 <td className="stock-list__symbol-cell">{item.symbol}</td>
                                                 <td>{placeholder(item.companyName)}</td>
                                                 <td><Badge variant="outline">{placeholder(item.market)}</Badge></td>
@@ -485,7 +493,10 @@ export default function StockListPage() {
                                                             type="button"
                                                             variant="outline"
                                                             size="xs"
-                                                            onClick={() => navigate(`/stocks/${encodeURIComponent(item.symbol)}`)}
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                handleNavigateToStock(item.symbol)
+                                                            }}
                                                         >
                                                             View Detail
                                                         </Button>
@@ -494,7 +505,10 @@ export default function StockListPage() {
                                                             variant={watchedSymbols.has(item.symbol) ? "default" : "outline"}
                                                             size="icon-xs"
                                                             aria-label={watchedSymbols.has(item.symbol) ? `Remove ${item.symbol} from watchlist` : `Add ${item.symbol} to watchlist`}
-                                                            onClick={() => handleWatchlistToggle(item.symbol)}
+                                                            onClick={(event) => {
+                                                                event.stopPropagation()
+                                                                void handleWatchlistToggle(item.symbol)
+                                                            }}
                                                             disabled={watchlistLoading.has(item.symbol)}
                                                             className={watchedSymbols.has(item.symbol) ? "text-white" : "text-white/60"}
                                                         >
@@ -508,6 +522,7 @@ export default function StockListPage() {
                                                             variant="outline"
                                                             size="icon-xs"
                                                             aria-label={`Configure alert for ${item.symbol}`}
+                                                            onClick={(event) => event.stopPropagation()}
                                                             disabled
                                                         >
                                                             <Bell className="size-3" />
