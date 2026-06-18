@@ -320,6 +320,34 @@ export default function UserProfilePage() {
     }
 
     return (
+        <>
+            {/* Upgrade CTA — always visible for free users regardless of tab */}
+            {isFreePlan && (
+                <Link
+                    to="/upgrade"
+                    className="group relative mb-6 flex items-center justify-between gap-4 overflow-hidden rounded-xl border border-amber-500/25 bg-gradient-to-r from-amber-500/[0.08] via-amber-500/[0.04] to-orange-500/[0.08] px-6 py-5 transition-all hover:border-amber-500/45 hover:shadow-lg hover:shadow-amber-500/[0.07]"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-500/30">
+                            <Crown className="size-6 text-white" />
+                        </div>
+                        <div>
+                            <p className="text-base font-semibold text-[#F8FAFC]">
+                                You're on the <span className="text-amber-400">Free</span> plan
+                            </p>
+                            <p className="mt-0.5 text-sm text-[#94A3B8]">
+                                Upgrade to unlock premium features and get the most out of your experience
+                            </p>
+                        </div>
+                    </div>
+
+                    <span className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-amber-500/30 transition-all group-hover:from-amber-400 group-hover:to-orange-400 group-hover:shadow-amber-400/30">
+                        Upgrade Now
+                        <Sparkles className="size-4" />
+                    </span>
+                </Link>
+            )}
+
         <section className="terminal-workspace-page" aria-label="User profile">
             {/* Header */}
             <header className="terminal-workspace-page__header">
@@ -388,6 +416,8 @@ export default function UserProfilePage() {
                             </div>
                         </div>
                     </div>
+
+
                 </div>
             )}
 
@@ -491,14 +521,9 @@ export default function UserProfilePage() {
                         <Lock className="mr-1.5 size-3.5" />
                         Change Password
                     </Button>
-                    <Button asChild variant={isFreePlan ? "default" : "outline"}>
-                        <Link to="/upgrade">
-                            <Crown className="mr-1.5 size-3.5" />
-                            {isFreePlan ? "Upgrade Plan" : "View Plan"}
-                        </Link>
-                    </Button>
                 </div>
             )}
+        </section>
 
             {/* ─── Edit Profile Dialog ─── */}
             <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
@@ -693,6 +718,6 @@ export default function UserProfilePage() {
                     </form>
                 </DialogContent>
             </Dialog>
-        </section>
-    )
-}
+            </>
+        )
+    }
