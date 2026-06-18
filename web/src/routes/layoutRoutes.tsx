@@ -22,6 +22,12 @@ import EtlMonitorPage from "@/pages/EtlMonitorPage"
 import DataValidationPage from "@/pages/DataValidationPage"
 import ImportHistoryPage from "@/pages/ImportHistoryPage"
 import StockDataMonitorPage from "@/pages/StockDataMonitorPage"
+import AdminSubscriptionManagement from "@/pages/Admin/SubscriptionManagement/AdminSubscriptionManagement"
+import AdminSubscriptionDetail from "@/pages/Admin/SubscriptionDetail/AdminSubscriptionDetail"
+import SubscriptionStats from "@/pages/Admin/SubscriptionStats/SubscriptionStats"
+import TransactionLog from "@/pages/Admin/TransactionLog/TransactionLog"
+import StaffSubscriptionManagement from "@/pages/Staff/StaffSubscriptionManagement/StaffSubscriptionManagement"
+import StaffSubscriptionDetail from "@/pages/Staff/StaffSubscriptionManagement/StaffSubscriptionDetail"
 import UpgradePage from "@/pages/UpgradePage/UpgradePage"
 
 export type LayoutRoute = {
@@ -56,6 +62,8 @@ export const STAFF_ROUTES: LayoutRoute[] = [
     { path: "/staff/import-history", element: <ImportHistoryPage /> },
     { path: "/staff/stock-data-monitor", element: <StockDataMonitorPage /> },
     { path: "/staff/settings", element: <SettingsPage /> },
+    { path: "/staff/subscriptions", element: <StaffSubscriptionManagement /> },
+    { path: "/staff/subscriptions/:userId", element: <StaffSubscriptionDetail /> },
 ]
 
 export const ADMIN_ROUTES: LayoutRoute[] = [
@@ -69,4 +77,8 @@ export const ADMIN_ROUTES: LayoutRoute[] = [
     { path: "/admin/settings", element: <AdminShell /> },
     { path: "/admin/profile", element: <UserProfilePage /> },
     { path: "/admin/stocks", element: <AdminStockList /> },
+    { path: "/admin/subscriptions", element: <AdminSubscriptionManagement /> },
+    { path: "/admin/subscriptions/stats", element: <SubscriptionStats /> },
+    { path: "/admin/subscriptions/transactions", element: <TransactionLog /> },
+    { path: "/admin/subscriptions/:userId", element: <AdminSubscriptionDetail /> },
 ]

@@ -3,6 +3,7 @@ import {
     Activity,
     Archive,
     BadgeCheck,
+    CreditCard,
     Database,
     FileStack,
     HardDriveDownload,
@@ -47,6 +48,7 @@ const STAFF_NAV_ITEMS: StaffNavItem[] = [
     { label: "Data Validation", to: "/staff/data-validation", icon: BadgeCheck },
     { label: "Import History", to: "/staff/import-history", icon: HardDriveDownload },
     { label: "Stock Data Monitor", to: "/staff/stock-data-monitor", icon: Archive },
+    { label: "Subscriptions", to: "/staff/subscriptions", icon: CreditCard, end: true },
 ]
 
 const SETTINGS_ITEM: StaffNavItem = { label: "Settings", to: "/staff/settings", icon: Settings }

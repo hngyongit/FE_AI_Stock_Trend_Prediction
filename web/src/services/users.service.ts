@@ -80,3 +80,40 @@ export async function changeMyPassword(data: {
         throw new Error(payload?.message || "Unable to change password")
     }
 }
+
+// ── My Transactions ───────────────────────────────────
+
+export type MyTransaction = {
+    id: string
+    type: "PAYOS_PAYMENT" | "ADMIN_GRANT" | "ADMIN_RENEW" | "ADMIN_CANCEL" | "ADMIN_MODIFY"
+    amount: number
+    status: "PAID" | "CANCELLED" | "REFUNDED" | "GRANTED" | "EXPIRED"
+    notes: string
+    created_at: string
+}
+
+export type MyTransactionsResponse = {
+    items: MyTransaction[]
+    pagination: {
+        page: number
+        limit: number
+        total_items: number
+        total_pages: number
+    }
+}
+
+export async function getMyTransactions(page?: number, limit?: number): Promise<MyTransactionsResponse> {
+    const response = await authenticatedRequest<ApiResponse<MyTransactionsResponse>>({
+        url: "/api/subscriptions/transactions",
+        method: "GET",
+        params: { page: page ?? 1, limit: limit ?? 20 },
+    })
+
+    const payload = response.data
+
+    if (response.status < 200 || response.status >= 300 || payload?.success === false) {
+        throw new Error(payload?.message || "Unable to load transactions")
+    }
+
+    return payload?.data ?? { items: [], pagination: { page: 1, limit: 20, total_items: 0, total_pages: 1 } }
+}
