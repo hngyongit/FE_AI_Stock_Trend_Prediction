@@ -22,6 +22,7 @@ import EtlMonitorPage from "@/pages/EtlMonitorPage"
 import DataValidationPage from "@/pages/DataValidationPage"
 import ImportHistoryPage from "@/pages/ImportHistoryPage"
 import StockDataMonitorPage from "@/pages/StockDataMonitorPage"
+import UpgradePage from "@/pages/UpgradePage/UpgradePage"
 
 export type LayoutRoute = {
     path: string
@@ -40,6 +41,7 @@ export const USER_ROUTES: LayoutRoute[] = [
     { path: "/historical-analysis", element: <HistoricalAnalysisPage /> },
     { path: "/comparison", element: <ComparisonPage /> },
     { path: "/settings", element: <SettingsPage /> },
+    { path: "/upgrade", element: <UpgradePage /> },
 ]
 
 export const STAFF_ROUTES: LayoutRoute[] = [
