@@ -325,7 +325,6 @@
 }
 
 .terminal-workspace-page {
-    min-height: calc(100vh - var(--topbar-height) - var(--statusbar-height) - 40px);
     border: 1px solid var(--terminal-shell-border);
     border-radius: 12px;
     background: var(--terminal-shell-background);
