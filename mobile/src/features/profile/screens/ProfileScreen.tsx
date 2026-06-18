@@ -21,6 +21,7 @@ import { ProfileRow } from '@/features/profile/components/ProfileRow';
 import { ProfileScreenHeader } from '@/features/profile/components/ProfileScreenHeader';
 import { ProfileSection } from '@/features/profile/components/ProfileSection';
 import { ProfileSkeleton } from '@/features/profile/components/ProfileSkeleton';
+import { ProfileUpgradeCard } from '@/features/profile/components/ProfileUpgradeCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useAuthStore } from '@/stores/auth.store';
 
@@ -63,6 +64,10 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
     navigation.navigate('ChangePassword');
   }, [navigation]);
 
+  const openUpgradePanel = useCallback(() => {
+    navigation.navigate('UpgradePlan');
+  }, [navigation]);
+
   return (
     <SafeAreaView edges={['left', 'right']} style={styles.safeArea}>
       <View style={styles.shell}>
@@ -90,6 +95,7 @@ export function ProfileScreen({ navigation }: MainTabScreenProps<'Profile'>) {
           {!showSkeleton ? (
             <View style={styles.sections}>
               <ProfileHeaderCard profile={effectiveProfile} />
+              <ProfileUpgradeCard onPress={openUpgradePanel} profile={effectiveProfile} />
 
               {error ? (
                 <View style={styles.inlineError}>

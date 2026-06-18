@@ -1,4 +1,6 @@
 export type AuthRole = 'USER' | 'STAFF' | 'ADMIN';
+export type UserPlan = 'FREE' | 'PRO' | string;
+export type SubscriptionStatus = 'NONE' | 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | string;
 
 export type AuthUser = {
   id: string;
@@ -6,6 +8,10 @@ export type AuthUser = {
   email: string;
   role: AuthRole;
   status: string;
+  plan?: UserPlan;
+  subscription_status?: SubscriptionStatus;
+  subscription_expires_at?: string | null;
+  created_at?: string;
 };
 
 export type AuthSession = {

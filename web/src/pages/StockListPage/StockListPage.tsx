@@ -106,6 +106,17 @@ export default function StockListPage() {
     const [watchedSymbols, setWatchedSymbols] = useState<Set<string>>(new Set())
     const [watchlistLoading, setWatchlistLoading] = useState<Set<string>>(new Set())
 
+    const activeMarketLabel = useMemo(() => {
+        const marketValues = Array.from(new Set(
+            state.items
+                .map((item) => item.market?.trim().toUpperCase())
+                .filter((market): market is string => Boolean(market)),
+        ))
+
+        if (marketValues.length === 1) return marketValues[0]
+        return query.market?.trim().toUpperCase() || "Selected"
+    }, [query.market, state.items])
+
     const loadWatchedSymbols = useCallback(async () => {
         if (!isAuthenticated) return
         try {
@@ -299,6 +310,13 @@ export default function StockListPage() {
         setStatusFilter("all")
     }
 
+    const handleMarketChange = (market: string) => {
+        setQuery((current) => ({ ...current, market, page: 1 }))
+        setSectorFilter("all")
+        setStatusFilter("all")
+        setTablePage(1)
+    }
+
     return (
         <div className="stock-list">
             <Breadcrumb items={["Home", "Stock List"]} />
@@ -306,10 +324,10 @@ export default function StockListPage() {
             <section className="stock-list__header">
                 <div>
                     <h1>Stock List</h1>
-                    <p>Browse HOSE-listed stocks and monitor market data quality</p>
+                    <p>Browse {activeMarketLabel}-listed stocks and monitor market data quality</p>
                 </div>
                 <div className="stock-list__header-status">
-                    <span><strong>Market</strong>{query.market}</span>
+                    <span><strong>Market</strong>{activeMarketLabel}</span>
                     <span><strong>Total stocks</strong>{state.meta.total ?? state.items.length ?? "--"}</span>
                     <span><strong>Last updated</strong>{placeholder(state.meta.lastUpdated)}</span>
                     <span><strong>Source</strong>{placeholder(state.meta.source)}</span>
@@ -322,7 +340,7 @@ export default function StockListPage() {
                 <select
                     value={query.market}
                     className="stock-list__select"
-                    onChange={(event) => setQuery((current) => ({ ...current, market: event.target.value, page: 1 }))}
+                    onChange={(event) => handleMarketChange(event.target.value)}
                 >
                     {["HOSE", "HNX", "UPCOM"].map((market) => (
                         <option key={market} value={market}>{market}</option>
@@ -367,7 +385,7 @@ export default function StockListPage() {
                     ["Valid symbols", qualitySummary.validSymbols || "--"],
                     ["Missing company names", qualitySummary.missingCompanyNames],
                     ["Missing price data", qualitySummary.missingPriceData],
-                    ["Market scope", query.market],
+                    ["Market scope", activeMarketLabel],
                     ["Last fetch time", qualitySummary.lastFetchTime],
                 ].map(([label, value]) => (
                     <div key={label} className="stock-list__summary-card">
@@ -380,7 +398,7 @@ export default function StockListPage() {
             <section className="stock-list__table-card">
                 <div className="stock-list__table-header">
                     <div>
-                        <h2>HOSE Stock Universe</h2>
+                        <h2>{activeMarketLabel} Stock Universe</h2>
                         <p>{sortedItems.length} filtered rows from {state.items.length} fetched records</p>
                     </div>
                     <div className="stock-list__pagination">

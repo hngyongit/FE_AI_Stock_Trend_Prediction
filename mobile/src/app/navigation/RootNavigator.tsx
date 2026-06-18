@@ -6,6 +6,7 @@ import { LoginScreen } from '@/features/auth/screens/LoginScreen';
 import { RegisterScreen } from '@/features/auth/screens/RegisterScreen';
 import { ChangePasswordScreen } from '@/features/profile/screens/ChangePasswordScreen';
 import { EditProfileScreen } from '@/features/profile/screens/EditProfileScreen';
+import { UpgradePlanScreen } from '@/features/profile/screens/UpgradePlanScreen';
 import { StartupScreen } from '@/features/startup/screens/StartupScreen';
 import { StockDetailScreen } from '@/features/stocks/screens/StockDetailScreen';
 import type { RootStackParamList } from '@/app/navigation/navigation.types';
@@ -66,6 +67,11 @@ export function RootNavigator() {
       <Stack.Screen
         name="EditProfile"
         component={EditProfileScreen}
+        options={profileChildScreenOptions}
+      />
+      <Stack.Screen
+        name="UpgradePlan"
+        component={UpgradePlanScreen}
         options={profileChildScreenOptions}
       />
       <Stack.Screen

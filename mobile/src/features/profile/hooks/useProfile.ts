@@ -77,6 +77,29 @@ export function useProfile({ onUnauthorized }: UseProfileOptions) {
         cachedProfile = nextProfile;
         profileRef.current = nextProfile;
         setProfile(nextProfile);
+
+        const activeSession = useAuthStore.getState().session;
+        if (activeSession) {
+          const mergedUser = {
+            ...activeSession.user,
+            id: nextProfile.id ?? activeSession.user.id,
+            full_name: nextProfile.full_name ?? activeSession.user.full_name,
+            email: nextProfile.email ?? activeSession.user.email,
+            role: activeSession.user.role,
+            status: nextProfile.status ?? activeSession.user.status,
+            plan: nextProfile.plan ?? activeSession.user.plan,
+            subscription_status:
+              nextProfile.subscription_status ?? activeSession.user.subscription_status,
+            subscription_expires_at:
+              nextProfile.subscription_expires_at ?? activeSession.user.subscription_expires_at,
+            created_at: nextProfile.created_at ?? activeSession.user.created_at,
+          };
+
+          useAuthStore.getState().setSession({
+            ...activeSession,
+            user: mergedUser,
+          });
+        }
       } catch (error) {
         const isUnauthorized =
           error instanceof ProfileRequestError &&

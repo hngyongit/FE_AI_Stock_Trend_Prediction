@@ -10,6 +10,7 @@ export type RootStackParamList = {
   Register: undefined;
   MainTabs: NavigatorScreenParams<MainTabParamList>;
   EditProfile: undefined;
+  UpgradePlan: undefined;
   StockDetail: { symbol?: string } | undefined;
   CreateAlert: { symbol?: string };
   EditAlert: { alertId: string };
