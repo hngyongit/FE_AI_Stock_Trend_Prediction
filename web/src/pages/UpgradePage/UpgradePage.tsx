@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from "react";
+import { getSubscriptionStatus, createPayment } from "@/services/subscription.service";
 import "./UpgradePage.css";
-import subscriptionService from "../../services/subscriptions.service";
 
 type PlanName = "Free" | "Pro";
 
@@ -56,13 +56,14 @@ function UpgradePage() {
                 setLoadingStatus(true);
                 setErrorMessage("");
 
-                const response = await subscriptionService.getSubscriptionStatus();
+                // Gọi trực tiếp hàm đã import
+                const statusData = await getSubscriptionStatus();
 
-                if (response.success && response.data) {
+                if (statusData) {
                     const plan =
-                        response.data.plan ||
-                        response.data.subscription?.plan ||
-                        response.data.subscription?.type ||
+                        statusData.plan ||
+                        statusData.subscription?.plan ||
+                        statusData.subscription?.type ||
                         "Free";
 
                     setCurrentPlan(String(plan));
@@ -107,17 +108,18 @@ function UpgradePage() {
             setUpgradingPlan(planName);
             setErrorMessage("");
 
-            const response = await subscriptionService.createPayment();
+            // Gọi trực tiếp hàm đã import
+            const paymentData = await createPayment();
 
-            if (response.success && response.data?.checkoutUrl) {
-                window.location.href = response.data.checkoutUrl;
+            if (paymentData?.checkoutUrl) {
+                window.location.href = paymentData.checkoutUrl;
                 return;
             }
 
-            setErrorMessage(response.message || "Cannot create payment.");
-        } catch (error) {
+            setErrorMessage("Cannot create payment.");
+        } catch (error: any) {
             console.error("Create payment error:", error);
-            setErrorMessage("Failed to create payment. Please try again.");
+            setErrorMessage(error.message || "Failed to create payment. Please try again.");
         } finally {
             setUpgradingPlan(null);
         }

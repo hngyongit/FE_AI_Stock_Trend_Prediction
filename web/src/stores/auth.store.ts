@@ -1,5 +1,4 @@
 import { create } from "zustand"
-
 import {
     AUTH_SESSION_CLEARED_EVENT,
     clearAuthSession,
@@ -18,6 +17,7 @@ export type AuthState = {
 type AuthStore = AuthState & {
     isAuthenticated: boolean
     setSession: (session: AuthState, rememberMe?: boolean) => void
+    updateUser: (userUpdates: Partial<AuthUser>) => void
     clearSession: () => void
     signOut: () => Promise<void>
 }
@@ -30,9 +30,7 @@ const emptyAuthState: AuthState = {
 
 function getInitialAuthState(): AuthState {
     const session = readAuthSession()
-
     if (!session) return emptyAuthState
-
     return {
         accessToken: session.accessToken,
         refreshToken: session.refreshToken,
@@ -49,7 +47,7 @@ function toStoreState(state: AuthState) {
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
     ...toStoreState(getInitialAuthState()),
-
+    
     setSession: (session, rememberMe) => {
         if (rememberMe !== undefined) {
             if (rememberMe) {
@@ -57,7 +55,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             } else {
                 localStorage.removeItem("rememberMe")
             }
-
             if (session.accessToken && session.refreshToken && session.user) {
                 saveAuthSession(
                     {
@@ -69,18 +66,33 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
                 )
             }
         }
-
         set(toStoreState(session))
+    },
+
+    updateUser: (userUpdates) => {
+        const current = get()
+        if (current.user && current.accessToken && current.refreshToken) {
+            const updatedUser = { ...current.user, ...userUpdates }
+            const rememberMe = localStorage.getItem("rememberMe") === "true"
+            saveAuthSession(
+                {
+                    accessToken: current.accessToken,
+                    refreshToken: current.refreshToken,
+                    user: updatedUser,
+                },
+                rememberMe
+            )
+            set({ user: updatedUser })
+        }
     },
 
     clearSession: () => {
         clearAuthSession()
         set(toStoreState(emptyAuthState))
     },
-
+    
     signOut: async () => {
         const accessToken = get().accessToken
-
         try {
             if (accessToken) {
                 await logout(accessToken)
