@@ -52,6 +52,20 @@ function getStatusTone(status?: string) {
   };
 }
 
+function getPlanTone(plan?: string) {
+  if (plan === 'PRO') {
+    return {
+      borderColor: '#A78BFA',
+      textColor: '#C4B5FD',
+    };
+  }
+
+  return {
+    borderColor: palette.primary,
+    textColor: palette.primarySoft,
+  };
+}
+
 function formatCreatedDate(value?: string) {
   if (!value) {
     return '--';
@@ -86,6 +100,8 @@ function ProfileBadge({
 export function ProfileHeaderCard({ profile }: { profile: UserProfile | null }) {
   const statusValue = getFallbackValue(profile?.status);
   const statusTone = getStatusTone(profile?.status);
+  const planValue = getFallbackValue(profile?.plan ?? 'FREE');
+  const planTone = getPlanTone(profile?.plan);
 
   return (
     <Card style={styles.card}>
@@ -97,6 +113,7 @@ export function ProfileHeaderCard({ profile }: { profile: UserProfile | null }) 
           <Text style={styles.name}>{getFallbackValue(profile?.full_name)}</Text>
           <Text style={styles.email}>{getFallbackValue(profile?.email)}</Text>
           <View style={styles.badges}>
+            <ProfileBadge label={planValue} tone={planTone} />
             <ProfileBadge
               label={getFallbackValue(profile?.role)}
               tone={{ borderColor: palette.primary, textColor: palette.primary }}

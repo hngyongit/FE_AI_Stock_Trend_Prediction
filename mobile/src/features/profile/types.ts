@@ -1,3 +1,5 @@
+import type { SubscriptionStatus, UserPlan } from '@/features/auth/types';
+
 export type ProfileStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED' | string;
 
 export type UserProfile = {
@@ -6,6 +8,9 @@ export type UserProfile = {
   email?: string;
   role?: string;
   status?: ProfileStatus;
+  plan?: UserPlan;
+  subscription_status?: SubscriptionStatus;
+  subscription_expires_at?: string | null;
   created_at?: string;
 };
 
