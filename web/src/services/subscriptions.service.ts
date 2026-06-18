@@ -1,7 +1,6 @@
-import axios from "axios";
+import { authenticatedRequest, getApiBaseUrl } from "@/services/auth.service";
 
-const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = getApiBaseUrl() || "http://localhost:8080";
 
 export type ApiResponse<T> = {
     success: boolean;
@@ -12,6 +11,8 @@ export type ApiResponse<T> = {
 export type SubscriptionStatus = {
     plan?: string;
     status?: string;
+    subscriptionStatus?: string;
+    subscriptionExpiresAt?: string | null;
     subscription?: {
         plan?: string;
         type?: string;
@@ -27,43 +28,33 @@ export type CreatePaymentResponse = {
     checkoutUrl: string;
 };
 
-const getAccessToken = () => {
-    return (
-        localStorage.getItem("access_token") ||
-        localStorage.getItem("accessToken") ||
-        localStorage.getItem("token")
-    );
-};
-
-const getAuthHeaders = () => {
-    const token = getAccessToken();
-
-    return {
-        Authorization: token ? `Bearer ${token}` : "",
-        "Content-Type": "application/json",
-    };
-};
-
 const subscriptionService = {
     async getSubscriptionStatus(): Promise<ApiResponse<SubscriptionStatus>> {
-        const response = await axios.get<ApiResponse<SubscriptionStatus>>(
-            `${API_BASE_URL}/api/subscriptions/status`,
-            {
-                headers: getAuthHeaders(),
-            }
-        );
+        const response = await authenticatedRequest<ApiResponse<SubscriptionStatus>>({
+            url: `${API_BASE_URL}/api/subscriptions/status`,
+            method: "GET",
+        });
+
+        if (response.status < 200 || response.status >= 300 || response.data?.success === false) {
+            throw new Error(response.data?.message || "Cannot load subscription status.");
+        }
 
         return response.data;
     },
 
     async createPayment(): Promise<ApiResponse<CreatePaymentResponse>> {
-        const response = await axios.post<ApiResponse<CreatePaymentResponse>>(
-            `${API_BASE_URL}/api/subscriptions/create-payment`,
-            {},
-            {
-                headers: getAuthHeaders(),
-            }
-        );
+        const response = await authenticatedRequest<ApiResponse<CreatePaymentResponse>>({
+            url: `${API_BASE_URL}/api/subscriptions/create-payment`,
+            method: "POST",
+            data: {},
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (response.status < 200 || response.status >= 300 || response.data?.success === false) {
+            throw new Error(response.data?.message || "Cannot create payment.");
+        }
 
         return response.data;
     },
