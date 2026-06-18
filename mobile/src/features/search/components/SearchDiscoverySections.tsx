@@ -93,7 +93,7 @@ export function SearchDiscoverySections({
 
       <View style={styles.section}>
         <View style={styles.quickHeader}>
-          <Text style={styles.sectionTitle}>VN30 Quick Access</Text>
+          <Text style={styles.sectionTitle}>AI Stock Trend Quick Access</Text>
           <Pressable accessibilityRole="button" onPress={onViewAll}>
             <Text style={styles.viewAllText}>{quickAccessActionLabel}</Text>
           </Pressable>

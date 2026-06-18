@@ -106,6 +106,32 @@
     align-items: center;
 }
 
+.ams__summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.ams__summary-card {
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #111827;
+}
+
+.ams__summary-card span {
+    display: grid;
+    gap: 4px;
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+}
+
+.ams__summary-card strong {
+    color: var(--foreground);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
 .ams__select {
     height: 36px;
     border: 1px solid var(--border);
@@ -289,6 +315,7 @@
     }
 
     .ams__header-status,
+    .ams__summary-grid,
     .ams__controls {
         grid-template-columns: 1fr;
     }

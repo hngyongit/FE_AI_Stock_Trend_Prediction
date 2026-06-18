@@ -21,7 +21,7 @@ export function WatchlistHeader({ title, onAddStock }: WatchlistHeaderProps) {
                 <View style={styles.subtitleRow}>
                     <View style={[styles.statusDot, { backgroundColor: statusDot }]} />
                     <Text style={[styles.subtitle, { color: statusColor }]}>
-                        HOSE · {marketStatus === 'OPEN' ? 'Market Open' : 'Latest session'}
+                        AI Stock Trend · {marketStatus === 'OPEN' ? 'Market Open' : 'Latest session'}
                     </Text>
                 </View>
             </View>

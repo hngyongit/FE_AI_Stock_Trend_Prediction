@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom"
 
 import AdminShell from "@/pages/Admin"
 import AdminUserManagement from "@/pages/Admin/AdminUserManagement/AdminUserManagement"
+import AdminStaffManagement from "@/pages/Admin/StaffManagement/AdminStaffManagement"
 import AdminStockList from "@/pages/Admin/StockManagement/AdminStockList"
 import AlertsPage from "@/pages/AlertsPage"
 import ComparisonPage from "@/pages/ComparisonPage"
@@ -58,7 +59,7 @@ export const STAFF_ROUTES: LayoutRoute[] = [
 export const ADMIN_ROUTES: LayoutRoute[] = [
     { path: "/admin/dashboard", element: <AdminShell /> },
     { path: "/admin/users", element: <AdminUserManagement /> },
-    { path: "/admin/staff", element: <AdminShell /> },
+    { path: "/admin/staff", element: <AdminStaffManagement /> },
     { path: "/admin/market-coverage", element: <AdminShell /> },
     { path: "/admin/alerts", element: <AdminShell /> },
     { path: "/admin/roles", element: <AdminShell /> },
