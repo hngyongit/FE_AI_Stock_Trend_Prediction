@@ -15,8 +15,13 @@ import { WatchlistSearchBar } from '@/features/watchlist/components/WatchlistSea
 import { WatchlistFilterChips } from '@/features/watchlist/components/WatchlistFilterChips';
 import { WatchlistRow } from '@/features/watchlist/components/WatchlistRow';
 import { SwipeableRow } from '@/features/watchlist/components/SwipeableRow';
+import { WatchlistOverlimitModal } from '@/features/watchlist/components/WatchlistOverlimitModal';
 import type { MainTabScreenProps } from '@/app/navigation/navigation.types';
-import type { WatchlistItem } from '@/features/watchlist/types';
+import type {
+  WatchlistItem,
+  WatchlistOverlimitItem,
+  WatchlistRawItem,
+} from '@/features/watchlist/types';
 
 function EmptyWatchlistState() {
   return (
@@ -44,9 +49,21 @@ function ErrorWatchlistState({ message, onRetry }: { message: string; onRetry: (
 export function WatchlistScreen() {
   const navigation = useNavigation<MainTabScreenProps<'Watchlist'>['navigation']>();
   const insets = useSafeAreaInsets();
-  const { items, isLoading, error, refresh, removeItem } = useWatchlist();
+  const {
+    items,
+    rawItems,
+    isLoading,
+    error,
+    refresh,
+    removeItem,
+    overLimit,
+    limit,
+    trimItems,
+    isTrimming,
+  } = useWatchlist();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeChip, setActiveChip] = useState('all');
+  const [showOverlimitModal, setShowOverlimitModal] = useState(false);
 
   const isActuallyLoading = isLoading && items.length === 0;
 
@@ -72,6 +89,26 @@ export function WatchlistScreen() {
 
     return result;
   }, [items, searchQuery, activeChip]);
+
+  const overlimitItems = useMemo(() => {
+    if (!overLimit) return [];
+    return rawItems.filter(
+      (item: WatchlistRawItem): item is WatchlistOverlimitItem =>
+        !('stock' in item),
+    );
+  }, [overLimit, rawItems]);
+
+  const handleTrimSuccess = useCallback(() => {
+    setShowOverlimitModal(false);
+    void refresh();
+  }, [refresh]);
+
+  const handleTrimItems = useCallback(
+    (keepStockIds: string[]) => {
+      trimItems(keepStockIds);
+    },
+    [trimItems],
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: WatchlistItem }) => {
@@ -126,6 +163,37 @@ export function WatchlistScreen() {
     );
   }
 
+  // Show overlimit modal when watchlist is over limit
+  // This overrides the normal list to force user to trim
+  if (overLimit && !isActuallyLoading) {
+    return (
+      <View style={styles.shell}>
+        <View style={{ paddingTop: insets.top }}>
+          {renderListHeader()}
+        </View>
+        <View style={styles.overlimitNotice}>
+          <Text style={styles.overlimitNoticeTitle}>
+            Watchlist limit reached
+          </Text>
+          <Text style={styles.overlimitNoticeBody}>
+            Your current plan allows up to {limit} stocks. Please trim your
+            watchlist to continue.
+          </Text>
+        </View>
+
+        <WatchlistOverlimitModal
+          open={showOverlimitModal || overLimit}
+          items={overlimitItems}
+          limit={limit}
+          onTrimSuccess={handleTrimSuccess}
+          onTrimItems={handleTrimItems}
+          isTrimming={isTrimming}
+          onBackToDashboard={() => navigation.navigate('Dashboard')}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.shell}>
       <FlatList
@@ -145,6 +213,16 @@ export function WatchlistScreen() {
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[]}
+      />
+
+      <WatchlistOverlimitModal
+        open={showOverlimitModal && !overLimit}
+        items={overlimitItems}
+        limit={limit}
+        onTrimSuccess={handleTrimSuccess}
+        onTrimItems={handleTrimItems}
+        isTrimming={isTrimming}
+        onBackToDashboard={() => navigation.navigate('Dashboard')}
       />
     </View>
   );
@@ -192,5 +270,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginTop: spacing.sm,
+  },
+  overlimitNotice: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.xl,
+  },
+  overlimitNoticeTitle: {
+    color: palette.warning,
+    fontSize: 16,
+    fontWeight: '600',
+    lineHeight: 24,
+  },
+  overlimitNoticeBody: {
+    color: palette.textSecondary,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });

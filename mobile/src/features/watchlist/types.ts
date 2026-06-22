@@ -26,6 +26,16 @@ export type WatchlistOverlimitItem = {
     stock_name: string;
 };
 
+export type AddToWatchlistResult = {
+    watchlist_id: string;
+    symbol: string;
+    created_at: string;
+};
+
+export type TrimWatchlistResult = {
+    deleted?: number;
+};
+
 export type WatchlistData = {
     items: WatchlistItem[] | WatchlistOverlimitItem[];
     limit: number;
@@ -38,3 +48,5 @@ export type WatchlistResponse = {
     message?: string;
     data: WatchlistData;
 };
+
+export type WatchlistRawItem = WatchlistItem | WatchlistOverlimitItem;
