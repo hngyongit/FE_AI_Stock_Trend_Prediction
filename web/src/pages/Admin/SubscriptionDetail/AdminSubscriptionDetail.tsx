@@ -25,8 +25,6 @@ import {
 } from "@/services/admin-subscription.service"
 import type {
     SubscriptionDetailData,
-    SubscriptionTransaction,
-    SubscriptionPlan,
     TransactionType,
 } from "@/types/subscription"
 

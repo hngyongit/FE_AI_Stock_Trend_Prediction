@@ -90,17 +90,6 @@ function getUserPlan(profile?: UserProfile | null) {
     return String(rawPlan).toUpperCase()
 }
 
-function getPlanBadgeClass(plan?: string) {
-    switch (plan?.toUpperCase()) {
-        case "PRO":
-            return "border-blue-500/30 bg-blue-500/10 text-blue-300"
-        case "PREMIUM":
-            return "border-purple-500/30 bg-purple-500/10 text-purple-300"
-        default:
-            return "border-slate-500/30 bg-slate-500/10 text-slate-300"
-    }
-}
-
 /* ── Yup schemas ────────────────────────────────────── */
 
 const profileSchema = object({

@@ -244,8 +244,6 @@ export default function AdminSubscriptionManagement() {
     const to = Math.min(page * (pagination?.limit ?? params.limit ?? 25), total)
 
     const activeProCount = useMemo(() => summary?.active_pro ?? items.filter((i) => i.subscription_status === "ACTIVE").length, [items, summary])
-    const expiredCount = useMemo(() => summary?.expired_pro ?? items.filter((i) => i.subscription_status === "EXPIRED").length, [items, summary])
-
     const hasFilters = Boolean(searchText.trim() || planFilter || statusFilter)
 
     const isActionBusy = (id: string, action: string) => actionLoading.includes(`${action}-${id}`)
