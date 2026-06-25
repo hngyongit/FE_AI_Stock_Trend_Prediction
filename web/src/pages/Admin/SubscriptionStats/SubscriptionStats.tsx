@@ -62,7 +62,7 @@ export default function SubscriptionStats() {
                     <div className="ass__conversion-bar">
                         <div className="ass__conversion-fill" style={{ width: `${overview.pro_percentage}%` }} />
                     </div>
-                    <span className="ass__stat-sub">{formatPercent(overview.pro_percentage, 1)} PRO conversion</span>
+                    <span className="ass__stat-sub">{formatPercent(overview.pro_percentage)} PRO conversion</span>
                 </div>
 
                 <div className="ass__stat-card">

@@ -116,7 +116,6 @@ web/
     │   ├── StockDetailPage/        # Individual stock details + charts
     │   ├── WatchlistPage/          # USER watchlist management
     │   ├── AlertsPage/             # USER alerts
-    │   ├── HistoricalAnalysisPage/ # Historical chart analysis
     │   ├── ComparisonPage/         # Side-by-side stock comparison
     │   ├── SettingsPage/           # User settings
     │   ├── StaffDashboardPage/     # STAFF main dashboard

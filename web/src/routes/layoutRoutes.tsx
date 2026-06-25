@@ -6,9 +6,10 @@ import AdminUserManagement from "@/pages/Admin/AdminUserManagement/AdminUserMana
 import AdminStaffManagement from "@/pages/Admin/StaffManagement/AdminStaffManagement"
 import AdminStockList from "@/pages/Admin/StockManagement/AdminStockList"
 import AlertsPage from "@/pages/AlertsPage"
+import AiReportHistoryPage from "@/pages/AiReportHistoryPage"
 import ComparisonPage from "@/pages/ComparisonPage"
-import HistoricalAnalysisPage from "@/pages/HistoricalAnalysisPage"
 import SettingsPage from "@/pages/SettingsPage"
+import StockAnalysisPage from "@/pages/StockAnalysisPage"
 import StockDetailPage from "@/pages/StockDetailPage/StockDetailPage"
 import StockListPage from "@/pages/StockListPage/StockListPage"
 import UserDashboard from "@/pages/UserDashboard/UserDashboard"
@@ -41,10 +42,11 @@ export const USER_ROUTES: LayoutRoute[] = [
     { path: "/stocks", element: <StockDetailPage /> },
     { path: "/stocks/:symbol", element: <StockDetailPage /> },
     { path: "/stock-list", element: <StockListPage /> },
-    { path: "/stock-analysis", element: <Navigate to="/stock-list" replace /> },
+    { path: "/stock-analysis", element: <StockAnalysisPage /> },
+    { path: "/stock-analysis/history", element: <AiReportHistoryPage /> },
+    { path: "/stock-analysis/history/:historyId", element: <AiReportHistoryPage /> },
     { path: "/watchlist", element: <WatchlistPage /> },
     { path: "/alerts", element: <AlertsPage /> },
-    { path: "/historical-analysis", element: <HistoricalAnalysisPage /> },
     { path: "/comparison", element: <ComparisonPage /> },
     { path: "/settings", element: <SettingsPage /> },
     { path: "/upgrade", element: <UpgradePage /> },

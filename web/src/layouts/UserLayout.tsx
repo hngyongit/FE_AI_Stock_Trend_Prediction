@@ -6,6 +6,7 @@ import {
     Scale,
     Settings,
     ShieldAlert,
+    Sparkles,
     TableProperties,
     Users,
 } from "lucide-react"
@@ -47,14 +48,16 @@ type NavItem = {
     label: string
     path: string
     icon: ComponentType<{ className?: string }>
+    end?: boolean
 }
 
 const NAV_ITEMS: NavItem[] = [
     { label: "Dashboard", path: "", icon: LayoutDashboard },
     { label: "Stock List", path: "stock-list", icon: TableProperties },
+    { label: "AI phân tích cổ phiếu", path: "stock-analysis", icon: Sparkles, end: true },
+    { label: "Lịch sử báo cáo AI", path: "stock-analysis/history", icon: History },
     { label: "Watchlist", path: "watchlist", icon: Users },
     { label: "Alerts", path: "alerts", icon: ShieldAlert },
-    { label: "Historical Analysis", path: "historical-analysis", icon: History },
     { label: "Comparison", path: "comparison", icon: Scale },
     { label: "Settings", path: "settings", icon: Settings },
 ]
@@ -229,7 +232,7 @@ export default function UserLayout({ shellData, basePath = "/staff", children }:
                             <NavLink
                                 key={item.path}
                                 to={routeFor(item.path)}
-                                end={!item.path}
+                                end={item.end ?? !item.path}
                                 className={({ isActive }) =>
                                     cn(
                                         "terminal-shell__nav-item",

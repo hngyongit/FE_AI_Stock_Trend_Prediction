@@ -8,7 +8,7 @@ function normalizeApiBaseUrl(value?: string) {
 }
 
 export function getApiBaseUrl() {
-    return normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL)
+    return normalizeApiBaseUrl(import.meta.env.VITE_BACKEND_API_BASE_URL ?? import.meta.env.VITE_API_BASE_URL)
 }
 
 export function getOAuthRedirectUri() {
@@ -85,12 +85,38 @@ function getAxiosErrorMessage(error: unknown, fallback: string) {
     return fallback
 }
 
+export function normalizeAuthToken(accessToken?: string | null): string | null {
+    const normalized = accessToken?.replace(/^Bearer\s+/i, "").trim()
+    return normalized || null
+}
+
+export function buildAuthHeaders(accessToken?: string | null): Record<string, string> {
+    const normalized = normalizeAuthToken(accessToken ?? getCurrentAccessToken())
+    if (!normalized) return {}
+
+    return {
+        Authorization: `Bearer ${normalized}`,
+    }
+}
+
+export function getCurrentAccessToken(): string | null {
+    const sessionToken = normalizeAuthToken(readAuthSession()?.accessToken)
+    if (sessionToken) return sessionToken
+
+    const directToken = normalizeAuthToken(
+        localStorage.getItem("access_token") || sessionStorage.getItem("access_token")
+    )
+    if (directToken) return directToken
+
+    return null
+}
+
 function withAuthHeader(config: AxiosRequestConfig, accessToken: string): AxiosRequestConfig {
     return {
         ...config,
         headers: {
             ...(config.headers ?? {}),
-            Authorization: `Bearer ${accessToken}`,
+            ...buildAuthHeaders(accessToken),
         },
     }
 }
@@ -220,12 +246,13 @@ export async function refreshAccessToken(refreshToken: string): Promise<string> 
 
 export async function authenticatedRequest<T = unknown>(config: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     const session = readAuthSession()
+    const accessToken = getCurrentAccessToken()
     const requestConfig: AxiosRequestConfig = {
         ...config,
         validateStatus: () => true,
     }
 
-    const firstConfig = session?.accessToken ? withAuthHeader(requestConfig, session.accessToken) : requestConfig
+    const firstConfig = accessToken ? withAuthHeader(requestConfig, accessToken) : requestConfig
     const firstResponse = await apiClient.request<T>(firstConfig)
     if (firstResponse.status !== 401) return firstResponse
 
