@@ -76,7 +76,7 @@ export default function CrawlLogsPage() {
                 <div className="flex gap-4 items-end">
                     <div className="flex flex-col gap-1">
                         <label className="text-xs text-[var(--muted-foreground)]">Status</label>
-                        <select 
+                        <select
                             className="bg-[#0f172a] border border-[var(--border)] rounded px-3 py-1.5 text-sm outline-none"
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
@@ -90,8 +90,8 @@ export default function CrawlLogsPage() {
                     </div>
                     <div className="flex flex-col gap-1">
                         <label className="text-xs text-[var(--muted-foreground)]">Date</label>
-                        <Input 
-                            type="date" 
+                        <Input
+                            type="date"
                             className="h-8 bg-[#0f172a] border-[var(--border)] text-sm"
                             value={dateFilter}
                             onChange={(e) => setDateFilter(e.target.value)}
@@ -127,26 +127,37 @@ export default function CrawlLogsPage() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {logs.map((log) => (
-                                    <tr key={log.id} className="hover:bg-slate-800/40 border-b border-[var(--border)]/50 last:border-0 text-sm">
-                                        <td className="p-3 text-blue-100 font-mono text-xs">{log.id.slice(0, 8)}</td>
-                                        <td className="p-3 text-slate-300">
-                                            {new Date(log.started_at).toLocaleString()}
-                                        </td>
-                                        <td className="p-3">
-                                            <StatusBadge status={log.status} />
-                                        </td>
-                                        <td className="p-3 font-medium">{formatNumber(log.records_fetched)}</td>
-                                        <td className="p-3 text-green-400 font-medium">{formatNumber(log.records_inserted)}</td>
-                                        <td className="p-3 text-blue-400 font-medium">{formatNumber(log.records_updated)}</td>
-                                        <td className="p-3 text-red-400 font-medium">{formatNumber(log.records_failed)}</td>
-                                        <td className="p-3 text-right">
-                                            <Button variant="ghost" size="icon-xs" onClick={() => handleViewDetail(log.id)}>
-                                                <Eye className="size-4" />
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {logs.map((log) => {
+
+                                    const isFailed = log.status === "FAILED";
+
+                                    return (
+                                        <tr
+                                            key={log.id}
+                                            className={`border-b border-[var(--border)]/50 last:border-0 text-sm transition-colors ${isFailed ? "bg-red-950/10 hover:bg-red-950/20" : "hover:bg-slate-800/40"
+                                                }`}
+                                        >
+                                            <td className={`p-3 font-mono text-xs ${isFailed ? "text-red-300" : "text-blue-100"}`}>
+                                                {log.id.slice(0, 8)}
+                                            </td>
+                                            <td className={`p-3 ${isFailed ? "text-red-200" : "text-slate-300"}`}>
+                                                {new Date(log.started_at).toLocaleString()}
+                                            </td>
+                                            <td className="p-3">
+                                                <StatusBadge status={log.status} />
+                                            </td>
+                                            <td className={`p-3 font-medium ${isFailed ? "text-red-300" : ""}`}>{formatNumber(log.records_fetched)}</td>
+                                            <td className="p-3 text-green-400 font-medium">{formatNumber(log.records_inserted)}</td>
+                                            <td className="p-3 text-blue-400 font-medium">{formatNumber(log.records_updated)}</td>
+                                            <td className={`p-3 font-medium ${isFailed ? "text-red-400" : "text-red-400"}`}>{formatNumber(log.records_failed)}</td>
+                                            <td className="p-3 text-right">
+                                                <Button variant="ghost" size="icon-xs" onClick={() => handleViewDetail(log.id)}>
+                                                    <Eye className="size-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>
@@ -162,7 +173,7 @@ export default function CrawlLogsPage() {
                         <div className="py-10 text-center text-slate-400">Loading details...</div>
                     ) : logDetailData ? (
                         <div className="space-y-6 pt-4">
-                            
+
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm bg-[#0f172a] p-4 rounded border border-slate-700">
                                 <div className="col-span-2 lg:col-span-4 border-b border-slate-700 pb-2 mb-2 flex justify-between items-center">
                                     <div><span className="text-slate-400 mr-2">ID:</span><span className="font-mono text-blue-200">{logDetailData.crawl_log.id}</span></div>
@@ -172,15 +183,15 @@ export default function CrawlLogsPage() {
                                 <div><span className="text-slate-400 block mb-1">Ended At</span> {logDetailData.crawl_log.ended_at ? new Date(logDetailData.crawl_log.ended_at).toLocaleString() : "Running"}</div>
                                 <div><span className="text-slate-400 block mb-1">Inserted</span> <span className="text-green-400 font-medium">{logDetailData.crawl_log.records_inserted}</span></div>
                                 <div><span className="text-slate-400 block mb-1">Failed</span> <span className="text-red-400 font-medium">{logDetailData.crawl_log.records_failed}</span></div>
-                                
+
                                 {logDetailData.crawl_log.error_message && (
                                     <div className="col-span-2 lg:col-span-4 mt-2 pt-2 border-t border-slate-700">
-                                        <span className="text-red-400 font-semibold block mb-1">Error Message:</span> 
+                                        <span className="text-red-400 font-semibold block mb-1">Error Message:</span>
                                         <span className="text-slate-300">{logDetailData.crawl_log.error_message}</span>
                                     </div>
                                 )}
                             </div>
-                            
+
                             {logDetailData.details && logDetailData.details.length > 0 && (
                                 <div>
                                     <h4 className="font-semibold text-slate-200 mb-3">Record Details ({logDetailData.details.length})</h4>
@@ -200,11 +211,10 @@ export default function CrawlLogsPage() {
                                                         <td className="p-3 font-bold">{item.symbol || item.stock?.symbol || "--"}</td>
                                                         <td className="p-3 text-slate-400 text-xs">{item.data_type}</td>
                                                         <td className="p-3">
-                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                                                item.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
-                                                                item.status === "FAILED" ? "bg-red-500/10 text-red-400" :
-                                                                "bg-yellow-500/10 text-yellow-400"
-                                                            }`}>
+                                                            <span className={`px-2 py-1 rounded text-xs font-medium ${item.status === "SUCCESS" ? "bg-green-500/10 text-green-400" :
+                                                                    item.status === "FAILED" ? "bg-red-500/10 text-red-400" :
+                                                                        "bg-yellow-500/10 text-yellow-400"
+                                                                }`}>
                                                                 {item.status}
                                                             </span>
                                                         </td>
