@@ -2,17 +2,39 @@ import { authenticatedRequest } from "@/services/auth.service"
 
 export type CrawlLog = {
     id: string
-    source: string
+    crawl_job: string | null
+    started_at: string
+    ended_at: string | null
     status: string
-    items_crawled: number
-    error_count: number
-    start_time: string
-    end_time?: string
+    records_fetched: number
+    records_inserted: number
+    records_updated: number
+    records_failed: number
+    error_message: string | null
+    created_at: string
+}
+export type CrawlLogDetailItem = {
+    id: string
+    stock?: {
+        id: string
+        symbol: string
+        company_name: string
+    }
+    symbol: string
+    data_type: string
+    status: string
+    message: string
+    created_at: string
 }
 
-export type CrawlLogDetail = CrawlLog & {
-    logs: string[]
+export type CrawlLogDetailResponse = {
+    crawl_log: CrawlLog
+    details: CrawlLogDetailItem[]
 }
+export type CrawlLogDetail = CrawlLog & {
+    logs?: string[]
+}
+
 
 export type FailedSymbol = {
     symbol: string
@@ -50,8 +72,8 @@ export async function getCrawlLogs(params?: {
     return response.data.data
 }
 
-export async function getCrawlLogById(id: string): Promise<CrawlLogDetail> {
-    const response = await authenticatedRequest<{ success: boolean; data: CrawlLogDetail }>({
+export async function getCrawlLogById(id: string): Promise<CrawlLogDetailResponse> {
+    const response = await authenticatedRequest<{ success: boolean; data: CrawlLogDetailResponse }>({
         url: `/api/staff/crawl-logs/${id}`,
         method: "GET",
     })
