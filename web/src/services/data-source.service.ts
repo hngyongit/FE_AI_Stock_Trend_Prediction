@@ -332,10 +332,16 @@ function normalizeDataSourceList(
 function normalizeQualityOverview(
     value: unknown
 ): DataQualityOverviewData {
-    const item = isRecord(value) ? value : {}
+    const raw = isRecord(value) ? value : {}
+
+    // BE wraps data in an "overall" key
+    const item: UnknownRecord =
+        isRecord(raw.overall) ? raw.overall : raw
 
     const totalRecords = toNumber(
         firstDefined(
+            item.records_fetched,
+            item.total_fetched,
             item.total_records,
             item.totalRecords,
             item.records_processed,
@@ -346,6 +352,8 @@ function normalizeQualityOverview(
 
     const validRecords = toNumber(
         firstDefined(
+            item.records_inserted,
+            item.total_inserted,
             item.valid_records,
             item.validRecords,
             item.passed_records,
@@ -356,6 +364,8 @@ function normalizeQualityOverview(
 
     const invalidRecords = toNumber(
         firstDefined(
+            item.records_failed,
+            item.total_failed,
             item.invalid_records,
             item.invalidRecords,
             item.failed_records,
@@ -366,6 +376,8 @@ function normalizeQualityOverview(
 
     const providedScore = toNumber(
         firstDefined(
+            item.avg_success_rate_percent,
+            item.avg_success_rate,
             item.quality_score,
             item.qualityScore,
             item.score,
@@ -426,6 +438,8 @@ function normalizeQualityBySource(
 
     const totalRecords = toNumber(
         firstDefined(
+            item.records_fetched,
+            item.total_fetched,
             item.total_records,
             item.totalRecords,
             item.record_count,
@@ -437,6 +451,8 @@ function normalizeQualityBySource(
 
     const validRecords = toNumber(
         firstDefined(
+            item.records_inserted,
+            item.total_inserted,
             item.valid_records,
             item.validRecords,
             item.passed_records,
@@ -447,6 +463,8 @@ function normalizeQualityBySource(
 
     const invalidRecords = toNumber(
         firstDefined(
+            item.records_failed,
+            item.total_failed,
             item.invalid_records,
             item.invalidRecords,
             item.failed_records,
@@ -457,6 +475,8 @@ function normalizeQualityBySource(
 
     const providedScore = toNumber(
         firstDefined(
+            item.avg_success_rate_percent,
+            item.avg_success_rate,
             item.quality_score,
             item.qualityScore,
             item.score,
@@ -524,6 +544,8 @@ function normalizeQualityByJob(
 
     const totalRecords = toNumber(
         firstDefined(
+            item.records_fetched,
+            item.total_fetched,
             item.total_records,
             item.totalRecords,
             item.record_count,
@@ -535,6 +557,8 @@ function normalizeQualityByJob(
 
     const validRecords = toNumber(
         firstDefined(
+            item.records_inserted,
+            item.total_inserted,
             item.valid_records,
             item.validRecords,
             item.passed_records,
@@ -545,6 +569,8 @@ function normalizeQualityByJob(
 
     const invalidRecords = toNumber(
         firstDefined(
+            item.records_failed,
+            item.total_failed,
             item.invalid_records,
             item.invalidRecords,
             item.failed_records,
@@ -555,6 +581,8 @@ function normalizeQualityByJob(
 
     const providedScore = toNumber(
         firstDefined(
+            item.avg_success_rate_percent,
+            item.avg_success_rate,
             item.quality_score,
             item.qualityScore,
             item.score,
