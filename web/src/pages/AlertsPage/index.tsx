@@ -24,10 +24,13 @@ import {
     type AlertItem, 
     type AlertType 
 } from "@/services/alert.service"
+import { getWatchlist } from "@/services/watchlist.service"
+import type { StockItem } from "@/services/stock.service"
 import "@/shared/components/shared-stock.css"
 
 export default function AlertsPage() {
     const [alerts, setAlerts] = useState<AlertItem[]>([])
+    const [watchlist, setWatchlist] = useState<StockItem[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -38,21 +41,25 @@ export default function AlertsPage() {
     const [threshold, setThreshold] = useState("")
     const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const loadAlerts = async () => {
+    const loadData = async () => {
         setIsLoading(true)
         setError(null)
         try {
-            const data = await getAlerts()
-            setAlerts(data)
+            const [alertsData, watchlistData] = await Promise.all([
+                getAlerts(),
+                getWatchlist()
+            ])
+            setAlerts(alertsData)
+            setWatchlist(watchlistData)
         } catch (err: any) {
-            setError(err.message || "Failed to load alerts")
+            setError(err.message || "Failed to load data")
         } finally {
             setIsLoading(false)
         }
     }
 
     useEffect(() => {
-        loadAlerts()
+        loadData()
     }, [])
 
     const handleToggle = async (id: string, currentStatus: string) => {
@@ -81,14 +88,14 @@ export default function AlertsPage() {
         setIsSubmitting(true)
         try {
             await createAlert({
-                symbol: symbol.toUpperCase(),
+                symbol: symbol,
                 alert_type: alertType,
                 threshold: Number(threshold)
             })
             setIsCreateOpen(false)
             setSymbol("")
             setThreshold("")
-            await loadAlerts()
+            await loadData()
         } catch (err: any) {
             alert(err.message || "Failed to create alert")
         } finally {
@@ -141,19 +148,27 @@ export default function AlertsPage() {
                             <form onSubmit={handleCreateAlert} className="space-y-4 pt-4">
                                 <div className="space-y-2">
                                     <label className="text-xs text-slate-400 font-medium">Stock Symbol</label>
-                                    <Input
-                                        placeholder="E.g. FPT"
+                                    <select 
+                                        className="w-full bg-[#0f172a] border border-slate-700 text-white rounded-md px-3 h-10 text-sm outline-none"
                                         value={symbol}
                                         onChange={(e) => setSymbol(e.target.value)}
-                                        className="bg-[#0f172a] border-slate-700 uppercase"
-                                        disabled={isSubmitting}
+                                        disabled={isSubmitting || watchlist.length === 0}
                                         required
-                                    />
+                                    >
+                                        <option value="" disabled>
+                                            {watchlist.length === 0 ? "Your watchlist is empty" : "Select from Watchlist"}
+                                        </option>
+                                        {watchlist.map(stock => (
+                                            <option key={stock.symbol} value={stock.symbol}>
+                                                {stock.symbol} {stock.companyName ? `- ${stock.companyName}` : ""}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-xs text-slate-400 font-medium">Condition</label>
                                     <select 
-                                        className="w-full bg-[#0f172a] border border-slate-700 rounded-md px-3 h-10 text-sm outline-none"
+                                        className="w-full bg-[#0f172a] border border-slate-700 text-white rounded-md px-3 h-10 text-sm outline-none"
                                         value={alertType}
                                         onChange={(e) => setAlertType(e.target.value as AlertType)}
                                         disabled={isSubmitting}
@@ -177,13 +192,15 @@ export default function AlertsPage() {
                                 </div>
                                 <div className="flex justify-end gap-2 pt-2">
                                     <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)} disabled={isSubmitting}>Cancel</Button>
-                                    <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "Creating..." : "Create"}</Button>
+                                    <Button type="submit" disabled={isSubmitting || watchlist.length === 0}>
+                                        {isSubmitting ? "Creating..." : "Create"}
+                                    </Button>
                                 </div>
                             </form>
                         </DialogContent>
                     </Dialog>
 
-                    <Button type="button" variant="outline" size="sm" onClick={loadAlerts} disabled={isLoading}>
+                    <Button type="button" variant="outline" size="sm" onClick={loadData} disabled={isLoading}>
                         <RefreshCw className="mr-1.5 size-3.5" />
                         Refresh
                     </Button>
@@ -194,7 +211,7 @@ export default function AlertsPage() {
                 {isLoading ? (
                     <TableLoading />
                 ) : error ? (
-                    <TableError message={error} onRetry={loadAlerts} />
+                    <TableError message={error} onRetry={loadData} />
                 ) : alerts.length === 0 ? (
                     <TableEmpty message="You don't have any active alerts." />
                 ) : (

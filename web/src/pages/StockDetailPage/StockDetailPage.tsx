@@ -171,12 +171,10 @@ export default function StockDetailPage() {
     const [range, setRange] = useState<StockChartRange>("1m")
     const [activeIndicators, setActiveIndicators] = useState<Set<Indicator>>(new Set(["SMA", "EMA"]))
     
-    // Watchlist & Auth states
     const [isWatched, setIsWatched] = useState(false)
     const [watchlistLoading, setWatchlistLoading] = useState(false)
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
-    // Alert states
     const [alerts, setAlerts] = useState<AlertItem[]>([])
     const [isAlertOpen, setIsAlertOpen] = useState(false)
     const [alertThreshold, setAlertThreshold] = useState("")
@@ -203,7 +201,6 @@ export default function StockDetailPage() {
         return () => { cancelled = true }
     }, [isAuthenticated, symbol])
 
-    // ── Poll stock detail for mock/live tick data ──────────────────────────
     const [mockPolling, setMockPolling] = useState(false)
     const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
@@ -225,7 +222,6 @@ export default function StockDetailPage() {
 
                 if (detail._mock) {
                     setMockPolling(true)
-
                     const snapshot = detail.latest_price
                     if (!snapshot) return
 
@@ -313,7 +309,6 @@ export default function StockDetailPage() {
             setAlertThreshold("")
             toast.success("Alert Created", { description: `We will notify you when ${symbol} hits the target.` })
             
-            // Reload alerts
             const alertList = await getAlerts()
             setAlerts(alertList.filter((a) => a.symbol === symbol))
         } catch (err: any) {
@@ -399,6 +394,7 @@ export default function StockDetailPage() {
         const sma = movingAverage(candles, 10)
         const ema = exponentialAverage(candles, 12)
         const bollingerMid = movingAverage(candles, 20)
+        
         const bollingerUpper = bollingerMid.map((mid, index) => {
             if (mid === undefined) return undefined
             const slice = candles.slice(Math.max(0, index - 19), index + 1).map((candle) => candle.close)
@@ -425,6 +421,31 @@ export default function StockDetailPage() {
                 },
                 xAxisIndex: 0,
                 yAxisIndex: 0,
+                markLine: {
+                    symbol: ['none', 'none'],
+                    silent: true,
+                    data: alerts
+                        .filter(a => a.status === 'ACTIVE' && a.alert_type !== 'VOLUME_ABOVE')
+                        .map(alert => {
+                            const isAbove = alert.alert_type === 'PRICE_ABOVE';
+                            return {
+                                yAxis: alert.threshold,
+                                name: isAbove ? 'Target' : 'Stop',
+                                lineStyle: {
+                                    color: isAbove ? '#22c55e' : '#ef4444',
+                                    type: 'dashed',
+                                    width: 1.5
+                                },
+                                label: {
+                                    show: true,
+                                    position: 'insideEndTop',
+                                    formatter: isAbove ? '📈 ≥ {c}' : '📉 ≤ {c}',
+                                    color: isAbove ? '#4ade80' : '#f87171',
+                                    fontSize: 11
+                                }
+                            }
+                        })
+                }
             },
             {
                 type: "bar",
@@ -433,6 +454,28 @@ export default function StockDetailPage() {
                 xAxisIndex: 1,
                 yAxisIndex: 1,
                 itemStyle: { color: "rgba(59, 130, 246, 0.45)" },
+                markLine: {
+                    symbol: ['none', 'none'],
+                    silent: true,
+                    data: alerts
+                        .filter(a => a.status === 'ACTIVE' && a.alert_type === 'VOLUME_ABOVE')
+                        .map(alert => ({
+                            yAxis: alert.threshold,
+                            name: 'Volume',
+                            lineStyle: {
+                                color: '#fbbf24',
+                                type: 'dotted',
+                                width: 1.5
+                            },
+                            label: {
+                                show: true,
+                                position: 'insideEndTop',
+                                formatter: '📊 ≥ {c}',
+                                color: '#fbbf24',
+                                fontSize: 10
+                            }
+                        }))
+                }
             },
         ]
 
@@ -516,7 +559,7 @@ export default function StockDetailPage() {
             ],
             series,
         }
-    }, [activeIndicators, state.candles])
+    }, [activeIndicators, state.candles, alerts])
 
     const currentPrice = analytics.latest?.close
     const isPositive = (analytics.change ?? 0) >= 0
