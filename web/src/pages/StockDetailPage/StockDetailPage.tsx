@@ -545,12 +545,29 @@ export default function StockDetailPage() {
                     scale: true,
                     axisLabel: { color: "#94a3b8", fontSize: 10 },
                     splitLine: { lineStyle: { color: "rgba(51, 65, 85, 0.5)" } },
+                    // Auto-scale to ensure Price markLines are visible
+                    min: (value: { min: number, max: number }) => {
+                        const priceAlerts = alerts.filter(a => a.status === 'ACTIVE' && a.alert_type !== 'VOLUME_ABOVE').map(a => a.threshold);
+                        const minValue = priceAlerts.length ? Math.min(value.min, ...priceAlerts) : value.min;
+                        return minValue - (minValue * 0.005); // 0.5% padding margin
+                    },
+                    max: (value: { min: number, max: number }) => {
+                        const priceAlerts = alerts.filter(a => a.status === 'ACTIVE' && a.alert_type !== 'VOLUME_ABOVE').map(a => a.threshold);
+                        const maxValue = priceAlerts.length ? Math.max(value.max, ...priceAlerts) : value.max;
+                        return maxValue + (maxValue * 0.005); // 0.5% padding margin
+                    }
                 },
                 {
                     scale: true,
                     gridIndex: 1,
                     axisLabel: { color: "#94a3b8", fontSize: 10 },
                     splitLine: { show: false },
+                    // Auto-scale to ensure Volume markLines are visible
+                    max: (value: { min: number, max: number }) => {
+                        const volAlerts = alerts.filter(a => a.status === 'ACTIVE' && a.alert_type === 'VOLUME_ABOVE').map(a => a.threshold);
+                        const maxValue = volAlerts.length ? Math.max(value.max, ...volAlerts) : value.max;
+                        return maxValue + (maxValue * 0.05); // 5% padding margin
+                    }
                 },
             ],
             dataZoom: [
@@ -643,7 +660,15 @@ export default function StockDetailPage() {
                     
                     <Dialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
                         <DialogTrigger asChild>
-                            <Button type="button" variant="outline" size="sm"><Bell className="size-3.5" /> Alert</Button>
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                size="sm"
+                                disabled={!isWatched}
+                                title={!isWatched ? "Please add this stock to your watchlist to create alerts" : "Create Alert"}
+                            >
+                                <Bell className="size-3.5" /> Alert
+                            </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[425px] bg-[#111827] text-white border-slate-700">
                             <DialogHeader>
