@@ -8,6 +8,14 @@ import { toast } from "sonner"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 import { Breadcrumb } from "@/shared/components"
 import {
@@ -19,6 +27,7 @@ import {
     type StockChartRange,
 } from "@/services/stock.service"
 import { getWatchlist, addToWatchlist, removeFromWatchlist } from "@/services/watchlist.service"
+import { getAlerts, createAlert, type AlertItem, type AlertType } from "@/services/alert.service"
 import { useAuthStore } from "@/stores/auth.store"
 import "./StockDetailPage.css"
 
@@ -161,18 +170,31 @@ export default function StockDetailPage() {
     const chartRef = useRef<EChartsReact>(null)
     const [range, setRange] = useState<StockChartRange>("1m")
     const [activeIndicators, setActiveIndicators] = useState<Set<Indicator>>(new Set(["SMA", "EMA"]))
+    
+    // Watchlist & Auth states
     const [isWatched, setIsWatched] = useState(false)
     const [watchlistLoading, setWatchlistLoading] = useState(false)
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
+    // Alert states
+    const [alerts, setAlerts] = useState<AlertItem[]>([])
+    const [isAlertOpen, setIsAlertOpen] = useState(false)
+    const [alertThreshold, setAlertThreshold] = useState("")
+    const [alertType, setAlertType] = useState<AlertType>("PRICE_ABOVE")
+    const [isSubmittingAlert, setIsSubmittingAlert] = useState(false)
 
     useEffect(() => {
         if (!isAuthenticated || !symbol) return
         let cancelled = false
         void (async () => {
             try {
-                const list = await getWatchlist()
+                const [list, userAlerts] = await Promise.all([
+                    getWatchlist(),
+                    getAlerts()
+                ])
                 if (!cancelled) {
                     setIsWatched(list.some((item) => item.symbol === symbol))
+                    setAlerts(userAlerts.filter((a) => a.symbol === symbol))
                 }
             } catch {
                 // non-blocking
@@ -185,11 +207,9 @@ export default function StockDetailPage() {
     const [mockPolling, setMockPolling] = useState(false)
     const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-    // Start polling if the chart data has mock flag, or when range is "1m" (short window suitable for demo)
     const isWithinMockWindow = range === "1m"
 
     useEffect(() => {
-        // Only poll when viewing short range (mock sessions use this range)
         if (!isWithinMockWindow || !symbol) {
             if (pollTimerRef.current) {
                 clearInterval(pollTimerRef.current)
@@ -203,23 +223,19 @@ export default function StockDetailPage() {
             try {
                 const detail = await getStockDetail(symbol)
 
-                // Check if we're in a mock session
                 if (detail._mock) {
                     setMockPolling(true)
 
                     const snapshot = detail.latest_price
                     if (!snapshot) return
 
-                    // Convert to candle and append to existing chart data
                     const candle = mockSnapshotToCandle(snapshot, detail._cursor)
 
-                    // Update current price display immediately
                     setState((prev) => ({
                         ...prev,
                         candles: [...prev.candles, candle],
                     }))
 
-                    // Show alert notification when threshold crossed
                     if (detail.alert_triggered) {
                         toast.info("Alert Triggered!", {
                             description: `${symbol} crossed the threshold. Check Alerts page for details.`,
@@ -227,7 +243,6 @@ export default function StockDetailPage() {
                         })
                     }
 
-                    // Stop polling when done
                     if (detail._done) {
                         if (pollTimerRef.current) {
                             clearInterval(pollTimerRef.current)
@@ -239,7 +254,6 @@ export default function StockDetailPage() {
                         })
                     }
                 } else if (mockPolling) {
-                    // Mock session ended externally (e.g. DELETE from Swagger)
                     setMockPolling(false)
                     if (pollTimerRef.current) {
                         clearInterval(pollTimerRef.current)
@@ -247,11 +261,10 @@ export default function StockDetailPage() {
                     }
                 }
             } catch {
-                // Silently handle — auth token might not be set
+                // Silently handle
             }
         }
 
-        // Start polling at 1.5s interval
         pollTimerRef.current = setInterval(poll, 1500)
         return () => {
             if (pollTimerRef.current) {
@@ -264,9 +277,7 @@ export default function StockDetailPage() {
 
     const handleWatchToggle = async () => {
         if (!isAuthenticated) {
-            toast.error("Authentication required", {
-                description: "Please log in to manage your watchlist",
-            })
+            toast.error("Authentication required", { description: "Please log in to manage your watchlist" })
             return
         }
         setWatchlistLoading(true)
@@ -274,22 +285,41 @@ export default function StockDetailPage() {
             if (isWatched) {
                 await removeFromWatchlist(symbol)
                 setIsWatched(false)
-                toast.success("Removed from watchlist", {
-                    description: `${symbol} has been removed from your watchlist`,
-                })
+                toast.success("Removed from watchlist")
             } else {
                 await addToWatchlist(symbol)
                 setIsWatched(true)
-                toast.success("Added to watchlist", {
-                    description: `${symbol} has been added to your watchlist`,
-                })
+                toast.success("Added to watchlist")
             }
         } catch (error) {
-            toast.error("Watchlist update failed", {
-                description: error instanceof Error ? error.message : "An unexpected error occurred",
-            })
+            toast.error("Watchlist update failed", { description: error instanceof Error ? error.message : "An unexpected error occurred" })
         } finally {
             setWatchlistLoading(false)
+        }
+    }
+
+    const handleCreateAlert = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!alertThreshold) return
+        
+        setIsSubmittingAlert(true)
+        try {
+            await createAlert({
+                symbol: symbol,
+                alert_type: alertType,
+                threshold: Number(alertThreshold)
+            })
+            setIsAlertOpen(false)
+            setAlertThreshold("")
+            toast.success("Alert Created", { description: `We will notify you when ${symbol} hits the target.` })
+            
+            // Reload alerts
+            const alertList = await getAlerts()
+            setAlerts(alertList.filter((a) => a.symbol === symbol))
+        } catch (err: any) {
+            toast.error("Failed to create alert", { description: err.message })
+        } finally {
+            setIsSubmittingAlert(false)
         }
     }
 
@@ -318,7 +348,6 @@ export default function StockDetailPage() {
         void loadChart()
     }, [loadChart])
 
-    // Resize chart when its container changes size
     useEffect(() => {
         const instance = chartRef.current?.getEchartsInstance()
         if (!instance) return
@@ -497,6 +526,9 @@ export default function StockDetailPage() {
         ? "--"
         : `${isPositive ? "+" : ""}${formatNumber(analytics.change, 3)} (${formatPercent(analytics.changePercent)})`
 
+    const activeRulesCount = alerts.filter((a) => a.status === "ACTIVE").length
+    const triggeredCount = alerts.filter((a) => a.status === "TRIGGERED").length
+
     return (
         <div className="stock-detail">
             <Breadcrumb items={["Home", "Dashboard", "Stock Detail"]} />
@@ -565,7 +597,49 @@ export default function StockDetailPage() {
                         <Download className="size-3.5" /> Export
                     </Button>
                     <Button type="button" variant="outline" size="sm"><GitCompareArrows className="size-3.5" /> Compare</Button>
-                    <Button type="button" variant="outline" size="sm"><Bell className="size-3.5" /> Alert</Button>
+                    
+                    <Dialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+                        <DialogTrigger asChild>
+                            <Button type="button" variant="outline" size="sm"><Bell className="size-3.5" /> Alert</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px] bg-[#111827] text-white border-slate-700">
+                            <DialogHeader>
+                                <DialogTitle>Create Alert for {symbol}</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={handleCreateAlert} className="space-y-4 pt-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-medium">Condition</label>
+                                    <select 
+                                        className="w-full bg-[#0f172a] border border-slate-700 rounded-md px-3 h-10 text-sm outline-none"
+                                        value={alertType}
+                                        onChange={(e) => setAlertType(e.target.value as AlertType)}
+                                        disabled={isSubmittingAlert}
+                                    >
+                                        <option value="PRICE_ABOVE">Price Rises Above (≥)</option>
+                                        <option value="PRICE_BELOW">Price Drops Below (≤)</option>
+                                        <option value="VOLUME_ABOVE">Volume Spikes Above (≥)</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs text-slate-400 font-medium">Target Value</label>
+                                    <Input
+                                        type="number"
+                                        placeholder="E.g. 150000"
+                                        value={alertThreshold}
+                                        onChange={(e) => setAlertThreshold(e.target.value)}
+                                        className="bg-[#0f172a] border-slate-700"
+                                        disabled={isSubmittingAlert}
+                                        required
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2 pt-2">
+                                    <Button type="button" variant="outline" onClick={() => setIsAlertOpen(false)} disabled={isSubmittingAlert}>Cancel</Button>
+                                    <Button type="submit" disabled={isSubmittingAlert}>{isSubmittingAlert ? "Creating..." : "Create"}</Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
+
                     <Button type="button" variant={isWatched ? "default" : "outline"} size="sm" onClick={handleWatchToggle} disabled={watchlistLoading}>
                         <Star className={`size-3.5 ${isWatched ? "fill-amber-400 text-amber-400" : ""} ${watchlistLoading ? "animate-pulse" : ""}`} /> {watchlistLoading ? "Processing..." : isWatched ? "Watching" : "Watch"}
                     </Button>
@@ -641,9 +715,9 @@ export default function StockDetailPage() {
                     <div className="stock-detail__card">
                         <div className="stock-detail__card-header"><h2>Alert Configuration</h2></div>
                         <div className="stock-detail__alert-list">
-                            <span>Active rules <strong>--</strong></span>
-                            <span>Triggered status <Badge variant="outline">--</Badge></span>
-                            <span>Channels <strong>--</strong></span>
+                            <span>Active rules <strong className="text-blue-400">{activeRulesCount}</strong></span>
+                            <span>Triggered status <Badge variant={triggeredCount > 0 ? "destructive" : "outline"}>{triggeredCount > 0 ? `${triggeredCount} Triggered` : "None"}</Badge></span>
+                            <span>Channels <strong>In-App, Email</strong></span>
                         </div>
                     </div>
                 </aside>
