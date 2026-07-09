@@ -42,10 +42,8 @@ type StaffLayoutProps = {
 const STAFF_NAV_ITEMS: StaffNavItem[] = [
     { label: "Staff Dashboard", to: "/staff/dashboard", icon: LayoutDashboard, end: true },
     { label: "Data Sources", to: "/staff/data-sources", icon: Database },
-    { label: "Crawl Jobs", to: "/staff/crawl-jobs", icon: Activity },
     { label: "Crawl Logs", to: "/staff/crawl-logs", icon: Logs },
     { label: "ETL Monitor", to: "/staff/etl-monitor", icon: FileStack },
-    { label: "Data Validation", to: "/staff/data-validation", icon: BadgeCheck },
     { label: "Import History", to: "/staff/import-history", icon: HardDriveDownload },
     { label: "Stock Data Monitor", to: "/staff/stock-data-monitor", icon: Archive },
     { label: "Subscriptions", to: "/staff/subscriptions", icon: CreditCard, end: true },

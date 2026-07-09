@@ -31,10 +31,10 @@ import { getAlerts, createAlert, type AlertItem, type AlertType } from "@/servic
 import { useAuthStore } from "@/stores/auth.store"
 import "./StockDetailPage.css"
 
-type Indicator = "SMA" | "EMA" | "RSI" | "MACD" | "Bollinger Bands"
+type Indicator = "SMA" | "EMA"
 
 const RANGES: StockChartRange[] = ["7d", "1m", "3m", "1y", "all"]
-const INDICATORS: Indicator[] = ["SMA", "EMA", "RSI", "MACD", "Bollinger Bands"]
+const INDICATORS: Indicator[] = ["SMA", "EMA"]
 
 type LoadState = {
     candles: StockCandle[]
@@ -393,20 +393,6 @@ export default function StockDetailPage() {
         const dates = candles.map((candle) => candle.time)
         const sma = movingAverage(candles, 10)
         const ema = exponentialAverage(candles, 12)
-        const bollingerMid = movingAverage(candles, 20)
-        
-        const bollingerUpper = bollingerMid.map((mid, index) => {
-            if (mid === undefined) return undefined
-            const slice = candles.slice(Math.max(0, index - 19), index + 1).map((candle) => candle.close)
-            const deviation = standardDeviation(slice)
-            return deviation === undefined ? undefined : mid + deviation * 2
-        })
-        const bollingerLower = bollingerMid.map((mid, index) => {
-            if (mid === undefined) return undefined
-            const slice = candles.slice(Math.max(0, index - 19), index + 1).map((candle) => candle.close)
-            const deviation = standardDeviation(slice)
-            return deviation === undefined ? undefined : mid - deviation * 2
-        })
 
         const series: EChartsOption["series"] = [
             {
@@ -484,12 +470,6 @@ export default function StockDetailPage() {
         }
         if (activeIndicators.has("EMA")) {
             series.push({ type: "line", name: "EMA 12", data: ema, smooth: true, showSymbol: false, lineStyle: { color: "#38bdf8", width: 1.4 } })
-        }
-        if (activeIndicators.has("Bollinger Bands")) {
-            series.push(
-                { type: "line", name: "BB Upper", data: bollingerUpper, smooth: true, showSymbol: false, lineStyle: { color: "#a78bfa", width: 1, opacity: 0.8 } },
-                { type: "line", name: "BB Lower", data: bollingerLower, smooth: true, showSymbol: false, lineStyle: { color: "#a78bfa", width: 1, opacity: 0.8 } }
-            )
         }
 
         return {
